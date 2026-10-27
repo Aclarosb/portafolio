@@ -310,7 +310,8 @@
     try {
       const ref = new URL(document.referrer);
       if (ref.origin === location.origin && !ref.pathname.endsWith("contacto.html")) {
-        document.getElementById("volver").href = ref.pathname.slice(1) + ref.hash || "index.html";
+        // ruta absoluta: funciona igual en localhost y en GitHub Pages (/portafolio/…)
+        document.getElementById("volver").href = ref.pathname + ref.hash;
       }
     } catch {}
   </script>
