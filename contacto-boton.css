@@ -1,0 +1,57 @@
+/* =========================================================
+   BOTÓN FLOTANTE "CONTÁCTAME" (proyectos y páginas de proyecto)
+   Un círculo pequeño con un sobre pixel; el texto solo aparece
+   al pasar el mouse o al llegar al final de la página.
+   ========================================================= */
+.fab-contacto {
+  position: fixed;
+  right: clamp(14px, 2vw, 26px);
+  bottom: clamp(14px, 2.4vh, 26px);
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  height: 50px;
+  padding: 0 15px;
+  gap: 0;
+  border-radius: 99px;
+  font: 700 12px "Silkscreen", monospace;
+  letter-spacing: .12em;
+  color: #fff;
+  text-decoration: none;
+  background: linear-gradient(180deg, #9d6cff, #6b3fd4);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .35),
+    inset 0 -3px 0 rgba(40, 10, 100, .45),
+    0 10px 24px rgba(10, 0, 30, .45),
+    0 0 18px rgba(170, 110, 255, .35);
+  opacity: 0;
+  translate: 0 20px;
+  scale: .8;
+  transition: opacity .5s, translate .5s cubic-bezier(.2, .9, .25, 1), scale .5s cubic-bezier(.3, 1.5, .5, 1), gap .35s, box-shadow .3s;
+}
+.fab-contacto.visible { opacity: .92; translate: 0 0; scale: 1; }
+.fab-contacto svg { width: 20px; height: 16px; flex: none; shape-rendering: crispEdges; transition: rotate .3s; }
+.fab-contacto span {
+  display: block;
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: max-width .4s cubic-bezier(.2, .9, .25, 1);
+}
+.fab-contacto:hover, .fab-contacto:focus-visible, .fab-contacto.abierto { opacity: 1; gap: 10px; }
+.fab-contacto:hover span, .fab-contacto:focus-visible span, .fab-contacto.abierto span { max-width: 140px; }
+.fab-contacto:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -3px 0 rgba(40, 10, 100, .45), 0 12px 28px rgba(10, 0, 30, .5), 0 0 30px rgba(185, 130, 255, .6); }
+.fab-contacto:hover svg { rotate: -8deg; }
+.fab-contacto:active { scale: .95; }
+
+/* se esconde mientras hay una imagen abierta en grande */
+body:has(.lb.abierto) .fab-contacto { opacity: 0; pointer-events: none; }
+
+@media (max-width: 600px) {
+  .fab-contacto { height: 46px; padding: 0 13px; }
+  .fab-contacto.abierto span { max-width: 0; }      /* en el celular queda solo el sobre */
+  .fab-contacto.abierto { gap: 0; }
+}
+
+/* al salir de la página se apaga junto con el resto */
+body.saliendo .fab-contacto, body.leaving .fab-contacto { opacity: 0; scale: .6; pointer-events: none; }

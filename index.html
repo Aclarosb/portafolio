@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Andres Claros — Portfolio</title>
+  <meta name="description" content="Portafolio de Andres Claros: diseño de apps, branding, modelado 3D y cortometrajes." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Doto:wght@600;800;900&family=Pixelify+Sans:wght@500;600;700&family=Space+Grotesk:wght@500;600&family=Press+Start+2P&family=Silkscreen:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- filtro de grano para la mano de CONTÁCTAME (puntitos claros y morados dentro de la forma) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <filter id="px-grain" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="7" result="noise" />
+      <feColorMatrix in="noise" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 -.9" result="light" />
+      <feComposite in="light" in2="SourceAlpha" operator="in" result="lightIn" />
+      <feColorMatrix in="noise" values="0 0 0 0 .3  0 0 0 0 .1  0 0 0 0 .55  0 0 0 -1.4 .5" result="dark" />
+      <feComposite in="dark" in2="SourceAlpha" operator="in" result="darkIn" />
+      <feMerge>
+        <feMergeNode in="SourceGraphic" />
+        <feMergeNode in="darkIn" />
+        <feMergeNode in="lightIn" />
+      </feMerge>
+    </filter>
+  </svg>
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="header">
+    <nav class="nav" aria-label="Categorías">
+      <a href="proyectos.html" data-text="BRANDING"><span>BRANDING</span></a>
+      <a href="proyectos.html" data-text="SHORT FILM"><span>SHORT FILM</span></a>
+      <a href="proyectos.html" data-text="3D MODELING"><span>3D MODELING</span></a>
+      <a href="proyectos.html" data-text="APP DESIGN"><span>APP DESIGN</span></a>
+    </nav>
+  </header>
+
+  <!-- ===================== ESCENA (parallax) ===================== -->
+  <main class="scene" id="scene">
+
+    <!-- Capa TV: foto + pantalla animada. Todo dentro de .tv-photo usa % de la foto,
+         así la pantalla calza siempre con el vidrio sin importar el tamaño de ventana. -->
+    <div class="layer" data-depth="0.35">
+      <div class="tv-photo">
+        <img class="tv-img" src="assets/tv-fondo.jpg" alt="" draggable="false" />
+
+        <!-- La máscara (assets/screen-mask.svg) tiene la forma exacta del vidrio -->
+        <div class="screen" id="screen">
+          <div class="crt" id="crt">
+            <div class="crt-content">
+              <p class="crt-name" aria-label="Andres Claros">
+                <span>ANDRES</span><span>CLAROS</span>
+              </p>
+              <h1 class="crt-title" aria-label="Portfolio">
+                <span>P</span><span>O</span><span>R</span><span>T</span><span>F</span><span>O</span><span>L</span><span>I</span><span>O</span>
+              </h1>
+              <a href="#" class="crt-projects" id="projectsBtn">
+                <span class="arrow">▶</span>PROJECTS
+              </a>
+            </div>
+
+            <!-- Pantalla 2: sobre mí + loading (aparece al entrar a PROJECTS) -->
+            <div class="crt-about" id="about" aria-live="polite">
+              <div class="about-text">
+                <p data-text="Soy Andrés Claros, creador digital. Diseño apps, construyo marcas con identidad propia, modelo personajes y objetos en 3D y cuento historias en cortometrajes."></p>
+                <p data-text="Aquí reúno proyectos personales, trabajos para clientes y colaboraciones con otros artistas. Elige un cartucho y dale play."></p>
+              </div>
+              <div class="loading">
+                <span class="loading-label" id="loadingLabel">Cargando<span class="dots"></span></span>
+                <div class="bar"><i id="barFill"></i></div>
+                <span class="pct" id="pct">0%</span>
+              </div>
+              <span class="skip" id="skip">CLIC PARA SALTAR</span>
+            </div>
+
+            <div class="crt-static"></div>
+            <div class="crt-dots"></div>
+            <div class="crt-grain"></div>
+            <div class="crt-vignette"></div>
+          </div>
+          <!-- reflejos y polvo reales de la foto, encima de la imagen -->
+          <img class="glass" src="assets/tv-fondo.jpg" alt="" draggable="false" />
+          <div class="glare" id="glare"></div>
+          <!-- punto de luz que queda al apagarse la pantalla -->
+          <div class="crt-flare" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Capa control (primer plano, se mueve al revés = profundidad).
+         assets/control.png es la foto del control con el fondo negro recortado -->
+    <div class="layer layer-pad" data-depth="-1.6">
+      <div class="pad-wrap">
+        <img class="pad-img" src="assets/control.png" alt="" draggable="false" />
+      </div>
+    </div>
+  </main>
+
+  <!-- ===================== FOOTER + CTA ===================== -->
+  <footer class="footer">
+    <button class="sound" id="soundBtn" aria-pressed="true" aria-label="Sonido">
+      <span class="bars"><i></i><i></i><i></i><i></i></span>
+    </button>
+
+    <a href="contacto.html" class="cta" id="cta">
+      CONTÁCTAME
+      <!-- mano pixel art que señala el botón -->
+      <svg class="cta-hand" viewBox="0 0 16 11" shape-rendering="crispEdges" aria-hidden="true">
+        <path fill="#2a1200" d="M6 0h1v1h-1zM7 0h1v1h-1zM8 0h1v1h-1zM9 0h1v1h-1zM5 1h1v1h-1zM10 1h1v1h-1zM11 1h1v1h-1zM12 1h1v1h-1zM13 1h1v1h-1zM14 1h1v1h-1zM15 1h1v1h-1zM0 2h1v1h-1zM1 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM5 2h1v1h-1zM12 2h1v1h-1zM15 2h1v1h-1zM0 3h1v1h-1zM12 3h1v1h-1zM15 3h1v1h-1zM0 4h1v1h-1zM1 4h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1zM5 4h1v1h-1zM12 4h1v1h-1zM15 4h1v1h-1zM4 5h1v1h-1zM12 5h1v1h-1zM15 5h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM12 6h1v1h-1zM15 6h1v1h-1zM4 7h1v1h-1zM12 7h1v1h-1zM15 7h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM12 8h1v1h-1zM15 8h1v1h-1zM5 9h1v1h-1zM12 9h1v1h-1zM15 9h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM9 10h1v1h-1zM10 10h1v1h-1zM11 10h1v1h-1zM12 10h1v1h-1zM13 10h1v1h-1zM14 10h1v1h-1zM15 10h1v1h-1z"/>
+        <path fill="#fff4e3" d="M6 1h1v1h-1zM7 1h1v1h-1zM8 1h1v1h-1zM9 1h1v1h-1zM6 2h1v1h-1zM7 2h1v1h-1zM8 2h1v1h-1zM9 2h1v1h-1zM10 2h1v1h-1zM11 2h1v1h-1zM1 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1zM4 3h1v1h-1zM5 3h1v1h-1zM6 3h1v1h-1zM7 3h1v1h-1zM8 3h1v1h-1zM9 3h1v1h-1zM10 3h1v1h-1zM11 3h1v1h-1zM6 4h1v1h-1zM7 4h1v1h-1zM8 4h1v1h-1zM9 4h1v1h-1zM10 4h1v1h-1zM11 4h1v1h-1zM5 5h1v1h-1zM6 5h1v1h-1zM7 5h1v1h-1zM8 5h1v1h-1zM9 5h1v1h-1zM10 5h1v1h-1zM11 5h1v1h-1zM6 6h1v1h-1zM7 6h1v1h-1zM8 6h1v1h-1zM9 6h1v1h-1zM10 6h1v1h-1zM11 6h1v1h-1zM5 7h1v1h-1zM6 7h1v1h-1zM7 7h1v1h-1zM8 7h1v1h-1zM9 7h1v1h-1zM10 7h1v1h-1zM7 8h1v1h-1zM8 8h1v1h-1zM9 8h1v1h-1zM6 9h1v1h-1zM7 9h1v1h-1zM8 9h1v1h-1zM9 9h1v1h-1z"/>
+        <path fill="#f6b27a" d="M11 7h1v1h-1zM10 8h1v1h-1zM11 8h1v1h-1zM10 9h1v1h-1zM11 9h1v1h-1z"/>
+        <path fill="#ff8a1e" d="M13 2h1v1h-1zM14 2h1v1h-1zM13 3h1v1h-1zM14 3h1v1h-1zM13 4h1v1h-1zM14 4h1v1h-1zM13 5h1v1h-1zM14 5h1v1h-1zM13 6h1v1h-1zM14 6h1v1h-1zM13 7h1v1h-1zM14 7h1v1h-1zM13 8h1v1h-1zM14 8h1v1h-1zM13 9h1v1h-1zM14 9h1v1h-1z"/>
+      </svg>
+    </a>
+
+    <span></span>
+  </footer>
+
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="power-on" id="powerOn" aria-hidden="true"></div>
+  <div class="warp" aria-hidden="true"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My Projects — Andres Claros</title>
+  <meta name="description" content="Proyectos de Andres Claros: diseño de apps, branding, modelado 3D y cortometrajes." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Doto:wght@800;900&family=Press+Start+2P&family=Silkscreen:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="proyectos.css" />
+  <link rel="stylesheet" href="contacto-boton.css" />
+</head>
+<body>
+
+  <!-- filtro de grano compartido por las flechas y la mano (puntitos claros y oscuros dentro de la forma) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <filter id="px-grain" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="7" result="noise" />
+      <!-- pocos puntitos y suaves: la forma se mantiene sólida, solo con textura -->
+      <feColorMatrix in="noise" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 -.9" result="light" />
+      <feComposite in="light" in2="SourceAlpha" operator="in" result="lightIn" />
+      <feColorMatrix in="noise" values="0 0 0 0 .3  0 0 0 0 .1  0 0 0 0 .55  0 0 0 -1.4 .5" result="dark" />
+      <feComposite in="dark" in2="SourceAlpha" operator="in" result="darkIn" />
+      <feMerge>
+        <feMergeNode in="SourceGraphic" />
+        <feMergeNode in="darkIn" />
+        <feMergeNode in="lightIn" />
+      </feMerge>
+    </filter>
+  </svg>
+
+  <a href="index.html" class="back" id="back"><span>◀</span> INICIO</a>
+
+  <main class="stage" id="stage">
+
+    <h1 class="title" aria-label="My Projects">
+      <span class="title-my">MY</span>
+      <span class="title-main">
+        <span>P</span><span>R</span><span>O</span><span>J</span><span>E</span><span>C</span><span>T</span><span>S</span>
+      </span>
+    </h1>
+
+    <!-- mano pixel art que señala el cartucho activo -->
+    <svg class="hand" id="hand" viewBox="0 0 16 11" shape-rendering="crispEdges" aria-hidden="true">
+        <path fill="#2a1200" d="M6 0h1v1h-1zM7 0h1v1h-1zM8 0h1v1h-1zM9 0h1v1h-1zM5 1h1v1h-1zM10 1h1v1h-1zM11 1h1v1h-1zM12 1h1v1h-1zM13 1h1v1h-1zM14 1h1v1h-1zM15 1h1v1h-1zM0 2h1v1h-1zM1 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM5 2h1v1h-1zM12 2h1v1h-1zM15 2h1v1h-1zM0 3h1v1h-1zM12 3h1v1h-1zM15 3h1v1h-1zM0 4h1v1h-1zM1 4h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1zM5 4h1v1h-1zM12 4h1v1h-1zM15 4h1v1h-1zM4 5h1v1h-1zM12 5h1v1h-1zM15 5h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM12 6h1v1h-1zM15 6h1v1h-1zM4 7h1v1h-1zM12 7h1v1h-1zM15 7h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM12 8h1v1h-1zM15 8h1v1h-1zM5 9h1v1h-1zM12 9h1v1h-1zM15 9h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM9 10h1v1h-1zM10 10h1v1h-1zM11 10h1v1h-1zM12 10h1v1h-1zM13 10h1v1h-1zM14 10h1v1h-1zM15 10h1v1h-1z"/>
+        <path fill="#fff4e3" d="M6 1h1v1h-1zM7 1h1v1h-1zM8 1h1v1h-1zM9 1h1v1h-1zM6 2h1v1h-1zM7 2h1v1h-1zM8 2h1v1h-1zM9 2h1v1h-1zM10 2h1v1h-1zM11 2h1v1h-1zM1 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1zM4 3h1v1h-1zM5 3h1v1h-1zM6 3h1v1h-1zM7 3h1v1h-1zM8 3h1v1h-1zM9 3h1v1h-1zM10 3h1v1h-1zM11 3h1v1h-1zM6 4h1v1h-1zM7 4h1v1h-1zM8 4h1v1h-1zM9 4h1v1h-1zM10 4h1v1h-1zM11 4h1v1h-1zM5 5h1v1h-1zM6 5h1v1h-1zM7 5h1v1h-1zM8 5h1v1h-1zM9 5h1v1h-1zM10 5h1v1h-1zM11 5h1v1h-1zM6 6h1v1h-1zM7 6h1v1h-1zM8 6h1v1h-1zM9 6h1v1h-1zM10 6h1v1h-1zM11 6h1v1h-1zM5 7h1v1h-1zM6 7h1v1h-1zM7 7h1v1h-1zM8 7h1v1h-1zM9 7h1v1h-1zM10 7h1v1h-1zM7 8h1v1h-1zM8 8h1v1h-1zM9 8h1v1h-1zM6 9h1v1h-1zM7 9h1v1h-1zM8 9h1v1h-1zM9 9h1v1h-1z"/>
+        <path fill="#f6b27a" d="M11 7h1v1h-1zM10 8h1v1h-1zM11 8h1v1h-1zM10 9h1v1h-1zM11 9h1v1h-1z"/>
+        <path fill="#ff8a1e" d="M13 2h1v1h-1zM14 2h1v1h-1zM13 3h1v1h-1zM14 3h1v1h-1zM13 4h1v1h-1zM14 4h1v1h-1zM13 5h1v1h-1zM14 5h1v1h-1zM13 6h1v1h-1zM14 6h1v1h-1zM13 7h1v1h-1zM14 7h1v1h-1zM13 8h1v1h-1zM14 8h1v1h-1zM13 9h1v1h-1zM14 9h1v1h-1z"/>
+    </svg>
+
+    <div class="carousel">
+      <button class="arrow arrow-left" id="prev" aria-label="Anterior">
+        <svg viewBox="0 0 7 7" shape-rendering="crispEdges"><path d="M3 0h1v1H3zM2 1h2v1H2zM1 2h6v3H1zM0 3h1v1H0zM2 5h2v1H2zM3 6h1v1H3z" fill="currentColor"/></svg>
+      </button>
+
+      <!-- CARTUCHOS
+           assets/cartuchos/*.jpg: las fotos enderezadas a 560x616 (todas de frente y del mismo tamaño).
+           La silueta del cartucho la recorta el CSS (.cart-body), igual para los cuatro.
+           data-title: el nombre que aparece debajo cuando el cartucho está activo
+           data-href: la página del proyecto · data-slug: el #ancla con el que se vuelve a este cartucho -->
+      <div class="carts" id="carts">
+        <button class="cart" data-name="BRANDING" data-title="NEXTMOVE" data-sub="Identidad de marca" data-slug="branding" data-href="nextmove.html">
+          <span class="cart-body"><img src="assets/cartuchos/branding.jpg" alt="Cartucho branding: nextmove" draggable="false" /></span>
+        </button>
+
+        <button class="cart" data-name="SHORT FILM" data-title="EMOTIONS" data-sub="Cortometraje · dirección y guion" data-slug="short-film" data-href="emotions.html">
+          <span class="cart-body"><img src="assets/cartuchos/short-film.jpg" alt="Cartucho short film: emotions" draggable="false" /></span>
+        </button>
+
+        <button class="cart" data-name="3D MODELING" data-title="ARMA SKAYN" data-sub="Modelado y texturizado 3D" data-slug="3d-modeling" data-href="arma-skayn.html">
+          <span class="cart-body"><img src="assets/cartuchos/3d-modeling.jpg" alt="Cartucho 3d modeling: guadaña" draggable="false" /></span>
+        </button>
+
+        <button class="cart" data-name="APP DESIGN" data-title="BALTO" data-sub="Diseño de app" data-slug="app-design" data-href="balto.html">
+          <span class="cart-body"><img src="assets/cartuchos/app-design.jpg" alt="Cartucho app design: balto" draggable="false" /></span>
+        </button>
+      </div>
+
+      <button class="arrow arrow-right" id="next" aria-label="Siguiente">
+        <svg viewBox="0 0 7 7" shape-rendering="crispEdges"><path d="M3 0h1v1H3zM3 1h2v1H3zM0 2h6v3H0zM6 3h1v1H6zM3 5h2v1H3zM3 6h1v1H3z" fill="currentColor"/></svg>
+      </button>
+    </div>
+
+    <!-- nombre del proyecto del cartucho activo -->
+    <div class="cart-info" id="info" aria-live="polite">
+      <p class="info-name" id="infoName">NEXTMOVE</p>
+    </div>
+
+    <nav class="cats" id="cats" aria-label="Categorías">
+      <a href="#branding">BRANDING</a>
+      <a href="#short-film">SHORT FILM</a>
+      <a href="#3d-modeling">3D MODELING</a>
+      <a href="#app-design">APP DESIGN</a>
+    </nav>
+  </main>
+
+  <!-- botón flotante de contacto (estilos en contacto-boton.css) -->
+  <a class="fab-contacto" id="fab" href="contacto.html" aria-label="Contáctame"><svg viewBox="0 0 9 7" aria-hidden="true"><path fill="currentColor" d="M0 0h9v1H0zM0 6h9v1H0zM0 1h1v5H0zM8 1h1v5H8zM1 1h1v1H1zM2 2h1v1H2zM3 3h1v1H3zM4 4h1v1H4zM5 3h1v1H5zM6 2h1v1H6zM7 1h1v1H7z"/></svg><span>CONTÁCTAME</span></a>
+
+  <div class="grain" aria-hidden="true"></div>
+  <div class="fade" id="fade" aria-hidden="true"></div>
+
+  <script src="proyectos.js"></script>
+</body>
+</html>

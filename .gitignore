@@ -1,0 +1,9 @@
+# Originales de trabajo: la web usa las versiones optimizadas de assets/proyectos y assets/cartuchos
+assets/Balto/
+assets/Emotions/
+assets/Nextmove/
+assets/armaskayn/
+assets/Cartucho*.jpg
+
+# configuración local
+.claude/

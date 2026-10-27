@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Arma Skayn · 3D — Andres Claros</title>
+  <meta name="description" content="Arma Skayn: modelado y texturizado 3D de la guadaña de Snow Moon Kayn en Blender y Substance 3D Painter." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Doto:wght@800;900&family=Press+Start+2P&family=Silkscreen:wght@700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="proyecto.css" />
+  <link rel="stylesheet" href="contacto-boton.css" />
+  <style>
+    /* ---------- ARMA SKAYN: rejilla de viewport 3D ---------- */
+    .p-arma .hero::before {          /* suelo de cuadrícula en perspectiva, como el viewport de Blender */
+      content: "";
+      position: absolute;
+      left: -20%; right: -20%; bottom: 0;
+      height: 46%;
+      z-index: -1;
+      background:
+        linear-gradient(rgba(255, 108, 184, .22) 1px, transparent 1px) 0 0 / 60px 60px,
+        linear-gradient(90deg, rgba(95, 227, 230, .18) 1px, transparent 1px) 0 0 / 60px 60px;
+      transform: perspective(500px) rotateX(62deg);
+      transform-origin: 50% 100%;
+      -webkit-mask: linear-gradient(transparent, #000 60%);
+      mask: linear-gradient(transparent, #000 60%);
+      animation: suelo 6s linear infinite;
+    }
+    .gizmo { position: absolute; top: 110px; right: calc(var(--gutter) + 40px); width: 64px; height: 64px; opacity: .8; animation: girarGizmo 14s linear infinite; }
+    .teal { color: var(--acc-2); }
+
+    /* análisis de la referencia */
+    .lupa-marco { position: relative; aspect-ratio: 1100 / 690; }
+    .lupa-marco img { object-fit: cover; }
+    .rasgos { display: grid; gap: 12px; margin-top: 24px; }
+    .rasgo { display: grid; grid-template-columns: 44px 1fr; gap: 14px; align-items: start; }
+    .rasgo i {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: grid; place-items: center;
+      font: 400 12px var(--f-pixel); font-style: normal;
+      color: #120a1e;
+      background: linear-gradient(135deg, var(--acc-2), var(--acc));
+    }
+    .rasgo h3 { font: 700 15px var(--f-title); letter-spacing: .06em; margin-bottom: 2px; }
+    .rasgo p { font-size: 15px; line-height: 1.5; color: var(--txt); }
+
+    /* pipeline de herramientas */
+    .pipeline { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: clamp(18px, 3vw, 46px); margin-bottom: clamp(40px, 6vh, 64px); }
+    .pipeline .nodo { cursor: pointer; padding: 14px 10px; }
+    .pipeline .nodo b { display: block; font: 400 8px var(--f-pixel); color: var(--acc-2); margin-bottom: 8px; }
+    .p-arma .scrub-texto { min-height: 7.5em; }
+    .scrub-fecha { font: 800 12px var(--f-ui); letter-spacing: .16em; color: var(--acc-2); }
+
+    /* despiece */
+    .despiece { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 56px 8px; }
+    .despiece .raiz { grid-column: 1 / -1; justify-self: center; padding: 14px 34px; font-size: 16px; }
+    .despiece .grupo { grid-column: span 3; justify-self: center; min-width: 70%; }
+    .despiece .grupo.g1 { grid-column: 1 / span 5; }
+    .despiece .grupo.g2 { grid-column: 6 / span 2; }
+    .despiece .grupo.g3 { grid-column: 8 / span 2; }
+    .despiece .pieza { padding: 10px 4px; font-size: 10px; letter-spacing: .02em; background: rgba(255, 255, 255, .02); }
+    .despiece .pieza small { font-size: 9px; letter-spacing: .06em; }
+    .lowhigh { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 24px; }
+    .lowhigh .card { padding: 18px 20px; }
+    .lowhigh strong { font: 400 11px var(--f-pixel); display: block; margin-bottom: 10px; }
+
+    /* topología */
+    .topo { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .topo .shot { aspect-ratio: 4 / 3; }
+    .mods { display: grid; gap: 10px; margin-top: 22px; }
+    .mod {
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font: 800 13px var(--f-ui);
+      letter-spacing: .1em;
+      background: #1d1a22;
+      box-shadow: inset 3px 0 0 var(--acc-2), inset 0 0 0 1px var(--line);
+    }
+    .mod span { color: var(--dim); }
+
+    /* capas de Substance */
+    .textura { display: grid; grid-template-columns: 1.6fr 1fr; gap: clamp(20px, 3vw, 44px); align-items: start; }
+    .capas { border-radius: 12px; overflow: hidden; background: #1b1820; box-shadow: inset 0 0 0 1px var(--line); }
+    .capas p.pie { margin: 0; padding: 12px 16px; background: #24202b; }
+    .capa {
+      display: grid; grid-template-columns: 18px 28px 1fr auto; gap: 12px; align-items: center;
+      padding: 10px 16px;
+      font: 800 12px var(--f-ui);
+      letter-spacing: .1em;
+      border-top: 1px solid rgba(255, 255, 255, .05);
+      transition: background .2s, opacity .2s;
+    }
+    .capa:hover { background: rgba(255, 108, 184, .08); }
+    .capa .ojo { color: var(--acc-2); }
+    .capa i { width: 28px; height: 28px; border-radius: 50%; background: var(--c); box-shadow: inset 0 -4px 8px rgba(0, 0, 0, .4); }
+    .capa small { color: var(--dim); }
+    .capa.sub { padding-left: 46px; }
+
+    /* resultado */
+    .resultado { display: grid; grid-template-columns: 1fr 1.25fr; gap: clamp(20px, 3vw, 44px); align-items: center; }
+    .resultado .final { aspect-ratio: 745 / 720; }
+
+    @keyframes suelo { to { background-position: 0 60px, 0 0; } }
+    @keyframes girarGizmo { to { rotate: 360deg; } }
+
+    @media (max-width: 900px) {
+      .pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .pipeline svg.lineas, .despiece svg.lineas { display: none; }
+      .despiece { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+      .despiece .grupo, .despiece .grupo.g1, .despiece .grupo.g2, .despiece .grupo.g3 { grid-column: 1 / -1; }
+      .textura, .resultado, .topo, .lowhigh { grid-template-columns: 1fr; }
+      .gizmo { display: none; }
+    }
+  </style>
+</head>
+<body class="p-arma cargando">
+
+  <div class="boot" aria-hidden="true">
+    <div class="boot-inner">
+      <p class="boot-label">INSERTANDO CARTUCHO 03</p>
+      <p class="boot-name grano">ARMA SKAYN</p>
+      <div class="boot-bar"><i></i></div>
+      <p class="boot-label">CLIC PARA SALTAR</p>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <a class="back" href="proyectos.html#3d-modeling" data-salir><span>◀</span> PROYECTOS</a>
+    <div class="xp">EXP <div class="xp-bar"><i></i></div></div>
+    <p class="topbar-tag">3D MODELING · 03/04</p>
+  </header>
+  <nav class="niveles" aria-label="Secciones"></nav>
+
+  <main class="pagina">
+
+    <!-- ================= HERO ================= -->
+    <section class="hero" id="inicio" data-nivel="INICIO">
+      <div class="hero-fondo" style="--fondo:url(assets/proyectos/arma/final.jpg)"></div>
+      <svg class="gizmo" viewBox="0 0 64 64" aria-hidden="true">
+        <line x1="32" y1="32" x2="58" y2="40" stroke="#ff4d6a" stroke-width="3" /><circle cx="58" cy="40" r="5" fill="#ff4d6a" />
+        <line x1="32" y1="32" x2="12" y2="46" stroke="#7bd85c" stroke-width="3" /><circle cx="12" cy="46" r="5" fill="#7bd85c" />
+        <line x1="32" y1="32" x2="32" y2="6" stroke="#4d8cff" stroke-width="3" /><circle cx="32" cy="6" r="5" fill="#4d8cff" />
+      </svg>
+      <div>
+        <p class="chip rv"><b></b> 3D MODELING · MODELADO Y TEXTURA</p>
+        <h1 class="grano rv" style="--d:.08s">ARMA<br>SKAYN</h1>
+        <p class="hero-tagline rv" style="--d:.16s">La guadaña Darkin de Kayn, de la referencia al render.</p>
+        <p class="lead rv" style="--d:.24s">Recreé en 3D el arma de <strong>Snow Moon Kayn</strong> (League of Legends): una hoja de cristal azul hielo con vetas magenta, modelada pieza por pieza en Blender y pintada en Substance 3D Painter.</p>
+        <dl class="ficha rv" style="--d:.32s">
+          <div><dt>SOFTWARE</dt><dd>Blender 4.5 · Substance 3D Painter</dd></div>
+          <div><dt>REFERENCIA</dt><dd>Snow Moon Kayn · LoL</dd></div>
+          <div><dt>PIEZAS</dt><dd>9 · versión low y high poly</dd></div>
+          <div><dt>TEXTURAS</dt><dd>2048 × 2048</dd></div>
+        </dl>
+        <a class="empezar rv" style="--d:.4s" href="#referencia">EMPEZAR NIVEL 1 <span>▼</span></a>
+      </div>
+      <div class="hero-cart rv" style="--d:.2s">
+        <div class="flota"><span class="cartucho"><span><img src="assets/cartuchos/3d-modeling.jpg" alt="Cartucho de Arma Skayn" /></span></span></div>
+      </div>
+    </section>
+
+    <!-- ================= NIVEL 1: REFERENCIA ================= -->
+    <section class="sec" id="referencia" data-nivel="REFERENCIA">
+      <div class="dos-col">
+        <div>
+          <figure class="rv">
+            <div class="shot lupa-marco" data-lupa="2.6" data-grupo="ref"><img src="assets/proyectos/arma/referencia.jpg" alt="Referencia: Snow Moon Kayn sosteniendo la guadaña" /></div>
+            <figcaption><b>LUPA</b> · Pasa el mouse para ver el detalle de la referencia</figcaption>
+          </figure>
+        </div>
+        <div>
+          <p class="nivel rv">NIVEL 1 · REFERENCIA</p>
+          <h2 class="rv" style="--d:.06s">Primero, <span class="acento">entender</span> el arma.</h2>
+          <p class="lead rv" style="--d:.12s">Antes de abrir Blender estudié la guadaña desde varios ángulos con el modelo del juego y un arte conceptual de la skin. Tres rasgos definían todo lo demás:</p>
+          <div class="rasgos">
+            <div class="rasgo rv" style="--d:.16s"><i>01</i><div><h3>Silueta</h3><p>Una hoja en media luna con picos hacia atrás y ganchos que se enroscan cerca del mango.</p></div></div>
+            <div class="rasgo rv" style="--d:.22s"><i>02</i><div><h3>Material</h3><p>Cristal azul hielo, casi blanco en los bordes, con una veta magenta que recorre la hoja.</p></div></div>
+            <div class="rasgo rv" style="--d:.28s"><i>03</i><div><h3>Proporción</h3><p>Mango largo y forrado en magenta, con un remate de púas abajo que equilibra el peso de la hoja.</p></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= NIVEL 2: PROCESO ================= -->
+    <section class="sec" id="proceso" data-nivel="PROCESO">
+      <div class="sec-head">
+        <p class="nivel rv">NIVEL 2 · PROCESO</p>
+        <h2 class="rv" style="--d:.06s">Doce capturas, <span class="acento">seis días</span>.</h2>
+        <p class="lead rv" style="--d:.12s">Del 16 al 21 de abril, contado con las capturas que fui guardando. Toca una herramienta, arrastra la barra o dale a reproducir.</p>
+      </div>
+
+      <div class="pipeline diagrama" data-orient="h" data-lineas="pl1>pl2, pl2>pl3, pl3>pl4, pl4>pl5">
+        <button class="nodo" id="pl1" data-ir="0"><b>BLENDER</b>Blockout<small>ETAPA 1–2</small></button>
+        <button class="nodo" id="pl2" data-ir="2"><b>BLENDER</b>Modelado<small>ETAPA 3–5</small></button>
+        <button class="nodo" id="pl3" data-ir="5"><b>BLENDER</b>UVs<small>ETAPA 6–7</small></button>
+        <button class="nodo" id="pl4" data-ir="7"><b>SUBSTANCE</b>Textura<small>ETAPA 8–10</small></button>
+        <button class="nodo raiz" id="pl5" data-ir="10"><b>BLENDER</b>Shading<small>ETAPA 11–12</small></button>
+      </div>
+
+      <div class="scrubber rv" data-scrubber>
+        <div class="scrub-visor">
+          <span class="scrub-hud">REC · ARMA</span>
+          <img class="scrub-capa" src="assets/proyectos/arma/blockout.jpg" alt="Blockout" data-titulo="Blockout" data-fecha="16 ABR" data-texto="Primeros planos sobre la imagen de referencia: formas simples que siguen la silueta de la hoja antes de pensar en detalle." />
+          <img class="scrub-capa" src="assets/proyectos/arma/etapas.jpg" alt="Modificadores" data-titulo="Mirror + Subdivisión" data-fecha="16 ABR" data-texto="Se modela solo una mitad: el modificador Mirror refleja el resto y Subdivision Surface (Catmull-Clark) suaviza las curvas." loading="lazy" />
+          <img class="scrub-capa" src="assets/proyectos/arma/esculpido.jpg" alt="Forma de la hoja" data-titulo="Forma" data-fecha="16 ABR" data-texto="La hoja ya subdividida: curvas limpias, picos afilados y los ganchos que rodean el cristal." loading="lazy" />
+          <img class="scrub-capa" src="assets/proyectos/arma/volumen.jpg" alt="Volumen" data-titulo="Volumen" data-fecha="19 ABR" data-texto="Grosor y biseles para que la hoja tenga cuerpo desde cualquier ángulo, no solo de frente." loading="lazy" />
+          <img class="scrub-capa" src="assets/proyectos/arma/modelo-completo.jpg" alt="Modelo completo" data-titulo="Modelo completo" data-fecha="21 ABR" data-texto="Hoja, mango y remate inferior juntos por primera vez: el arma entera con sus proporciones finales." loading="lazy" />
+          <img class="scrub-capa" src="assets/proyectos/arma/uvs.jpg" alt="UVs" data-titulo="UVs" data-fecha="21 ABR" data-texto="Las 9 piezas se despliegan en un solo mapa de UVs, separadas en versión low y high poly." loading="lazy" />
+          <img class="scrub-capa" src="assets/proyectos/arma/checker.jpg" alt="Checker" data-titulo="Checker" data-fecha="21 ABR" data-texto="Una textura de cuadros revela si las UVs estiran: si los cuadros se ven parejos, el mapa está listo para pintar." loading="lazy" />
+          <img class="scrub-capa" src="assets/proyectos/arma/textura-base.jpg" alt="Textura base" data-titulo="Textura base" data-fecha="21 ABR" data-texto="En Substance 3D Painter: el modelo entra en gris y se prueban los materiales base." loading="lazy" />
+          <img class="scrub-capa" src="assets/proyectos/arma/textura-color.jpg" alt="Color" data-titulo="Color" data-fecha="21 ABR" data-texto="Degradados azul hielo y la veta magenta, pintados por capas y comparando todo el tiempo con el modelo del juego." loading="lazy" />
+          <img class="scrub-capa" src="assets/proyectos/arma/textura-final.jpg" alt="Capas finales" data-titulo="Capas finales" data-fecha="21 ABR" data-texto="Mango, partes oscuras y desenfoques en capas separadas, sobre un conjunto de texturas de 2048 × 2048." loading="lazy" />
+          <img class="scrub-capa" src="assets/proyectos/arma/final-nodos.jpg" alt="Nodos" data-titulo="Shading" data-fecha="21 ABR" data-texto="De vuelta en Blender, las texturas exportadas se conectan con nodos al material del arma." loading="lazy" />
+          <img class="scrub-capa" src="assets/proyectos/arma/final.jpg" alt="Render final" data-titulo="Render" data-fecha="21 ABR" data-texto="El arma terminada: cristal translúcido, veta magenta y el mango forrado con su patrón de rombos." loading="lazy" />
+        </div>
+        <div>
+          <span class="scrub-fecha" id="scrubFecha">16 ABR</span>
+          <p class="scrub-titulo"></p>
+          <p class="txt scrub-texto"></p>
+        </div>
+        <div class="scrub-control">
+          <button class="btn-px scrub-play">▶ REPRODUCIR</button>
+          <div class="scrub-pista">
+            <input type="range" min="0" value="0" step="1" aria-label="Etapa del proceso" />
+            <div class="scrub-marcas">
+              <button>BLOCK</button><button>MIRROR</button><button>FORMA</button><button>VOLUMEN</button><button>MODELO</button><button>UVS</button>
+              <button>CHECKER</button><button>BASE</button><button>COLOR</button><button>CAPAS</button><button>NODOS</button><button>RENDER</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= NIVEL 3: DESPIECE ================= -->
+    <section class="sec" id="despiece" data-nivel="DESPIECE">
+      <div class="sec-head">
+        <p class="nivel rv">NIVEL 3 · DESPIECE</p>
+        <h2 class="rv" style="--d:.06s">Nueve piezas, <span class="acento">dos versiones</span> de cada una.</h2>
+        <p class="lead rv" style="--d:.12s">El arma no es un solo objeto: está dividida en piezas con nombre propio para poder modelarlas, desplegarlas y texturizarlas por separado.</p>
+      </div>
+
+      <div class="despiece diagrama" data-lineas="d-raiz>d-hoja, d-raiz>d-mango, d-raiz>d-base, d-hoja>d-filo, d-hoja>d-p2, d-hoja>d-p3, d-hoja>d-p4, d-hoja>d-p5, d-mango>d-ma, d-mango>d-mb, d-base>d-at, d-base>d-af">
+        <div class="nodo raiz" id="d-raiz">ARMA<small>9 PIEZAS</small></div>
+        <div class="nodo grupo g1" id="d-hoja">HOJA<small>5 PIEZAS</small></div>
+        <div class="nodo grupo g2" id="d-mango">MANGO<small>2 PIEZAS</small></div>
+        <div class="nodo grupo g3" id="d-base">REMATE<small>2 PIEZAS</small></div>
+        <div class="nodo pieza" id="d-filo">Filo<small>PRINCIPAL</small></div>
+        <div class="nodo pieza" id="d-p2">Pieza<small>2</small></div>
+        <div class="nodo pieza" id="d-p3">Pieza<small>3</small></div>
+        <div class="nodo pieza" id="d-p4">Pieza<small>4</small></div>
+        <div class="nodo pieza" id="d-p5">Pieza<small>5</small></div>
+        <div class="nodo pieza" id="d-ma">Arriba<small>MANGO</small></div>
+        <div class="nodo pieza" id="d-mb">Abajo<small>MANGO</small></div>
+        <div class="nodo pieza" id="d-at">Total<small>ABAJO</small></div>
+        <div class="nodo pieza" id="d-af">Final<small>ABAJO</small></div>
+      </div>
+
+      <div class="dos-col" style="margin-top:clamp(40px,6vh,70px);align-items:start">
+        <figure class="rv">
+          <div class="shot" data-grupo="despiece"><img src="assets/proyectos/arma/uvs.jpg" alt="Mapa de UVs y colecciones Arma_low y Arma_high en Blender" loading="lazy" /></div>
+          <figcaption><b>BLENDER</b> · Mapa de UVs y las colecciones Arma_low / Arma_high</figcaption>
+        </figure>
+        <div class="lowhigh">
+          <div class="card rv"><strong class="acento">HIGH POLY</strong><p class="txt">Todo el detalle: subdivisión, biseles y curvas suaves. Pesa mucho, por eso no es la versión final.</p></div>
+          <div class="card rv" style="--d:.08s"><strong class="teal">LOW POLY</strong><p class="txt">La misma pieza con pocos polígonos. En Substance recibe el detalle de la versión high horneado en sus texturas.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= NIVEL 4: TOPOLOGÍA ================= -->
+    <section class="sec" id="topologia" data-nivel="TOPOLOGÍA">
+      <div class="dos-col">
+        <div>
+          <p class="nivel rv">NIVEL 4 · TOPOLOGÍA</p>
+          <h2 class="rv" style="--d:.06s">Bordes limpios, <span class="acento">curvas suaves</span>.</h2>
+          <p class="lead rv" style="--d:.12s">Para que la subdivisión no deforme la hoja, cada borde afilado necesita loops de apoyo que lo sostengan. Así los picos quedan nítidos y las curvas, suaves.</p>
+          <div class="mods">
+            <div class="mod rv"><span>MODIFICADOR</span>MIRROR · X Y</div>
+            <div class="mod rv" style="--d:.06s"><span>SUBDIVISION</span>CATMULL-CLARK</div>
+            <div class="mod rv" style="--d:.12s"><span>NIVELES</span>VISTA 1 · RENDER 2</div>
+          </div>
+        </div>
+        <div class="topo">
+          <figure class="shot rv" data-lupa="2.2" data-grupo="topo"><img src="assets/proyectos/arma/topologia-1.jpg" alt="Detalle de topología del borde de la hoja" loading="lazy" /></figure>
+          <figure class="shot rv" data-lupa="2.2" data-grupo="topo" style="--d:.1s"><img src="assets/proyectos/arma/topologia-2.jpg" alt="Detalle de topología con loops de apoyo" loading="lazy" /></figure>
+          <figure class="shot rv" data-grupo="topo" style="grid-column:1/-1;aspect-ratio:16/8;--d:.15s"><img src="assets/proyectos/arma/detalle.jpg" alt="Detalle del modelo en el viewport" loading="lazy" /></figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= NIVEL 5: TEXTURA ================= -->
+    <section class="sec" id="textura" data-nivel="TEXTURA">
+      <div class="sec-head">
+        <p class="nivel rv">NIVEL 5 · TEXTURA</p>
+        <h2 class="rv" style="--d:.06s">Del gris al <span class="acento">cristal</span>.</h2>
+        <p class="lead rv" style="--d:.12s">Arrastra el divisor para comparar el modelo recién importado en Substance 3D Painter con la textura terminada.</p>
+      </div>
+      <div class="textura">
+        <div class="comparar rv" data-comparar>
+          <img src="assets/proyectos/arma/textura-base.jpg" alt="Modelo en gris en Substance 3D Painter" loading="lazy" />
+          <img class="despues" src="assets/proyectos/arma/textura-final.jpg" alt="Modelo con la textura final en Substance 3D Painter" loading="lazy" />
+          <div class="divisor"></div>
+          <span class="etq izq">BASE</span>
+          <span class="etq der">FINAL</span>
+        </div>
+        <div>
+          <div class="capas rv" style="--d:.1s">
+            <p class="pie"><b>CAPAS</b> · Substance 3D Painter · 2048 × 2048</p>
+            <div class="capa"><span class="ojo">◉</span><i style="--c:#2d3a5c"></i>PARTE OSCURA 2<small>39</small></div>
+            <div class="capa sub"><span class="ojo">◉</span><i style="--c:#555"></i>BLUR<small>100</small></div>
+            <div class="capa"><span class="ojo">◉</span><i style="--c:#7a1f4f"></i>PARTES DE MANGO<small>100</small></div>
+            <div class="capa sub"><span class="ojo">◉</span><i style="--c:#a52a6a"></i>MANGO 1<small>100</small></div>
+            <div class="capa sub"><span class="ojo">◉</span><i style="--c:#c2307c"></i>MANGO<small>100</small></div>
+          </div>
+          <p class="pie rv" style="margin:22px 0 10px"><b>PALETA DEL RENDER</b> · extraída de la imagen final</p>
+          <div class="rv" data-paleta="assets/proyectos/arma/final.jpg" data-vivos></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= NIVEL 6: RESULTADO ================= -->
+    <section class="sec" id="resultado" data-nivel="RESULTADO">
+      <div class="resultado">
+        <div>
+          <p class="nivel rv">NIVEL 6 · RESULTADO</p>
+          <h2 class="rv" style="--d:.06s">Rhaast, <span class="acento">listo para la pelea</span>.</h2>
+          <p class="lead rv" style="--d:.12s">El render final en Blender, con las texturas de Substance conectadas por nodos. Usa la lupa para ver el patrón del mango y la transparencia del cristal.</p>
+          <figure class="rv" style="margin-top:26px;--d:.18s">
+            <div class="shot" data-grupo="final" style="aspect-ratio:16/9"><img src="assets/proyectos/arma/final-nodos.jpg" alt="Editor de nodos de Blender con el material final" loading="lazy" /></div>
+            <figcaption><b>SHADING</b> · Nodos del material en Blender</figcaption>
+          </figure>
+        </div>
+        <figure class="rv" style="--d:.1s">
+          <div class="shot final" data-lupa="2.4" data-grupo="final"><img src="assets/proyectos/arma/final.jpg" alt="Render final de la guadaña de Snow Moon Kayn" loading="lazy" /></div>
+          <figcaption><b>RENDER</b> · Blender 4.5</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ================= SIGUIENTE ================= -->
+    <section class="sec" style="padding-top:20px">
+      <a class="siguiente rv" href="balto.html" data-salir>
+        <span class="cartucho"><span><img src="assets/cartuchos/app-design.jpg" alt="" /></span></span>
+        <div>
+          <small>SIGUIENTE CARTUCHO · 04/04</small>
+          <strong class="grano">BALTO</strong>
+          <em>▶ INSERTAR CARTUCHO</em>
+        </div>
+      </a>
+    </section>
+
+    <footer class="pie-pagina">
+      <span>ANDRES CLAROS · PORTAFOLIO</span>
+      <a href="proyectos.html#3d-modeling" data-salir>VOLVER A PROYECTOS ▲</a>
+    </footer>
+  </main>
+
+  <div class="grain" aria-hidden="true"></div>
+  <div class="salida" aria-hidden="true"></div>
+  <script src="proyecto.js"></script>
+  <script>
+    // ---------- Arma Skayn ----------
+    const marcas = document.querySelectorAll(".scrub-marcas button");
+    const capas = [...document.querySelectorAll(".scrub-capa")];
+    const fecha = document.getElementById("scrubFecha");
+    const nodosPipe = [...document.querySelectorAll(".pipeline .nodo")];
+    // la fecha y la herramienta activa siguen a la etapa del scrubber
+    new MutationObserver(() => {
+      const i = capas.findIndex((c) => c.classList.contains("activa"));
+      if (i < 0) return;
+      fecha.textContent = capas[i].dataset.fecha;
+      let activo = 0;
+      nodosPipe.forEach((n, k) => { if (i >= +n.dataset.ir) activo = k; });
+      nodosPipe.forEach((n, k) => n.classList.toggle("activo", k === activo));
+    }).observe(document.querySelector(".scrub-visor"), { subtree: true, attributes: true, attributeFilter: ["class"] });
+    // tocar una herramienta del pipeline salta a su etapa
+    nodosPipe.forEach((n) => n.addEventListener("click", () => marcas[+n.dataset.ir].click()));
+  </script>
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Emotions · Short film — Andres Claros</title>
+  <meta name="description" content="Emotions: cortometraje dirigido por Samuel Parada y Andres Claros." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Doto:wght@800;900&family=Press+Start+2P&family=Silkscreen:wght@700&family=Space+Grotesk:wght@400;500;600&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="proyecto.css" />
+  <link rel="stylesheet" href="contacto-boton.css" />
+  <style>
+    /* ---------- EMOTIONS: cine ---------- */
+    .p-emotions { --serif: "Cormorant Garamond", Georgia, serif; }
+    .p-emotions .grain { opacity: .26; }
+    .serif { font-family: var(--serif); font-style: italic; font-weight: 500; }
+
+    /* hero: un fotograma a pantalla completa con franjas de cine que se abren */
+    .cine { position: relative; height: 100vh; min-height: 620px; overflow: hidden; background: #000; }
+    .cine-img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: .78;
+      animation: kenburns 24s ease-in-out infinite alternate;
+    }
+    .cine::after {                   /* viñeta */
+      content: "";
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(120% 90% at 70% 50%, transparent 30%, rgba(0, 0, 0, .75) 100%),
+        linear-gradient(90deg, rgba(0, 0, 0, .8) 0%, rgba(0, 0, 0, .2) 55%, transparent);
+    }
+    .franja { position: absolute; left: 0; right: 0; height: 50%; background: #000; z-index: 3; transition: height 1.6s cubic-bezier(.7, 0, .2, 1) .5s; }
+    .franja.arriba { top: 0; }
+    .franja.abajo { bottom: 0; }
+    .pagina.encendida .franja { height: 11%; }
+    .cine-hud {
+      position: absolute; z-index: 4;
+      top: calc(11% + 18px); right: var(--gutter);
+      display: flex; gap: 22px;
+      font: 400 9px var(--f-pixel);
+      letter-spacing: .1em;
+      color: rgba(255, 255, 255, .7);
+    }
+    .cine-hud b { color: var(--acc); font-weight: 400; animation: parpadeo 1.2s steps(1) infinite; }
+    .cine-texto {
+      position: absolute; z-index: 4;
+      left: var(--gutter); bottom: calc(11% + clamp(24px, 5vh, 50px));
+      max-width: 640px;
+    }
+    .titulo-cine {
+      font: italic 500 clamp(76px, 13vw, 200px) / .85 var(--serif);
+      letter-spacing: -.01em;
+      margin: 18px 0 10px -.04em;
+      color: #fff;
+      text-shadow: 0 0 40px rgba(255, 90, 100, .35);
+    }
+    .titulo-cine span { display: inline-block; opacity: 0; translate: 0 .3em; filter: blur(10px); transition: opacity 1.2s, translate 1.2s cubic-bezier(.2, .9, .25, 1), filter 1.2s; transition-delay: calc(1.1s + var(--i) * .07s); }
+    .pagina.encendida .titulo-cine span { opacity: 1; translate: 0 0; filter: none; }
+    .cine-sub { font: italic 500 clamp(20px, 2vw, 28px) var(--serif); color: rgba(255, 255, 255, .85); }
+    .cine .ficha { margin: 26px 0 26px; }
+    .cine-cart {                     /* pequeño, apoyado en la franja de abajo para no tapar a los actores */
+      position: absolute; z-index: 4;
+      right: var(--gutter); bottom: 3%;
+      width: clamp(96px, 9vw, 140px);
+      rotate: 10deg;
+    }
+
+    /* reproductor en formato cine */
+    .pantalla { max-width: 1100px; margin: 0 auto; }
+    .pantalla-pie { display: flex; justify-content: space-between; gap: 16px; margin-top: 16px; }
+
+    /* sinopsis */
+    .cita { font: italic 500 clamp(30px, 3.6vw, 52px) / 1.1 var(--serif); color: #fff; margin: 18px 0 22px; }
+    .cita em { color: var(--acc); }
+
+    /* arco emocional */
+    .arco { display: grid; grid-template-columns: 1.5fr 1fr; gap: clamp(20px, 3vw, 50px); align-items: center; }
+    .arco-grafico {
+      position: relative;
+      aspect-ratio: 1000 / 420;
+      border-radius: 14px;
+      background:
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, .04) 0 1px, transparent 1px 10%),
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, .04) 0 1px, transparent 1px 25%),
+        #0a0610;
+      box-shadow: inset 0 0 0 1px var(--line);
+    }
+    .arco-grafico svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+    .arco-grafico .curva { fill: none; stroke: var(--acc); stroke-width: 3; stroke-dasharray: 1000; stroke-dashoffset: 1000; filter: drop-shadow(0 0 6px var(--acc-glow)); transition: stroke-dashoffset 2.2s cubic-bezier(.6, 0, .2, 1); }
+    .arco-grafico .area { fill: url(#arcoGrad); opacity: 0; transition: opacity 1s 1.4s; }
+    .arco-grafico.in .curva { stroke-dashoffset: 0; }
+    .arco-grafico.in .area { opacity: 1; }
+    .eje { position: absolute; font: 800 10px var(--f-ui); letter-spacing: .16em; color: var(--dim); }
+    .eje.y { left: 12px; top: 12px; }
+    .eje.x { right: 12px; bottom: 10px; }
+    .beat {
+      position: absolute;
+      left: var(--x); top: var(--y);
+      width: 22px; height: 22px;
+      margin: -11px 0 0 -11px;
+      border-radius: 50%;
+      background: #0a0610;
+      box-shadow: 0 0 0 3px var(--acc), 0 0 16px var(--acc-glow);
+      opacity: 0;
+      scale: 0;
+      transition: opacity .4s, scale .4s cubic-bezier(.3, 1.6, .5, 1), background .2s;
+      transition-delay: calc(.4s + var(--i) * .35s);
+    }
+    .arco-grafico.in .beat { opacity: 1; scale: 1; }
+    .beat:hover, .beat.activo { background: var(--acc); scale: 1.35; transition-delay: 0s; }
+    .beat span { position: absolute; left: 50%; top: 28px; translate: -50% 0; font: 400 8px var(--f-pixel); white-space: nowrap; color: var(--dim); transition: color .2s; }
+    .beat.activo span { color: var(--ink); }
+    .arco-detalle .shot { aspect-ratio: 16 / 9; }
+    .arco-detalle .shot img { transition: opacity .35s, transform .7s cubic-bezier(.2, .9, .25, 1); }
+    .arco-detalle .shot img.cambiando { opacity: 0; }
+    .arco-num { font: 400 10px var(--f-pixel); color: var(--acc); margin-top: 20px; display: block; }
+    .arco-titulo { font: italic 600 clamp(28px, 2.6vw, 38px) var(--serif); margin: 6px 0 8px; color: #fff; }
+
+    /* tira de película */
+    .pelicula {
+      align-items: stretch;
+      gap: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+    }
+    .cuadro {
+      flex: 0 0 auto;
+      width: clamp(280px, 34vw, 480px);
+      padding: 30px 8px;
+      background:
+        repeating-linear-gradient(90deg, transparent 0 10px, #f0e6dc 10px 22px, transparent 22px 32px) 0 9px / 100% 12px no-repeat,
+        repeating-linear-gradient(90deg, transparent 0 10px, #f0e6dc 10px 22px, transparent 22px 32px) 0 calc(100% - 9px) / 100% 12px no-repeat,
+        #120c08;
+      transition: translate .4s cubic-bezier(.2, .9, .25, 1);
+    }
+    .cuadro .shot { aspect-ratio: 16 / 9; border-radius: 2px; box-shadow: none; }
+    .cuadro .shot img { filter: sepia(.15) contrast(1.05); }
+    .cuadro:hover { translate: 0 -10px; }
+
+    /* estudio de color */
+    .estudio { display: grid; gap: 14px; }
+    .estudio .shot { aspect-ratio: 16 / 9; }
+    .estudio h3 { font: italic 600 26px var(--serif); color: #fff; }
+
+    /* créditos que suben */
+    .creditos {
+      position: relative;
+      height: clamp(380px, 60vh, 560px);
+      overflow: hidden;
+      border-radius: 6px;
+      background: #000 url(assets/proyectos/emotions/prueba.jpg) center / cover;
+      box-shadow: 0 0 0 1px var(--line), 0 40px 80px rgba(0, 0, 0, .6);
+      -webkit-mask: linear-gradient(transparent, #000 18%, #000 82%, transparent);
+      mask: linear-gradient(transparent, #000 18%, #000 82%, transparent);
+    }
+    .creditos::before { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, .78); }
+    .rollo { position: relative; text-align: center; padding-top: 100%; animation: rollo 26s linear infinite; }
+    .creditos:hover .rollo { animation-play-state: paused; }
+    .rollo h3 { font: italic 600 clamp(48px, 6vw, 84px) var(--serif); color: #fff; margin-bottom: 50px; }
+    .rollo dt { font: 800 12px var(--f-ui); letter-spacing: .3em; color: var(--acc); margin-top: 38px; }
+    .rollo dd { font: italic 500 clamp(22px, 2.2vw, 30px) / 1.35 var(--serif); color: #fff; margin-top: 8px; }
+
+    @keyframes kenburns { from { scale: 1.02; } to { scale: 1.12; translate: -2% 1%; } }
+    @keyframes rollo { from { translate: 0 0; } to { translate: 0 -100%; } }
+
+    @media (max-width: 900px) {
+      .cine-cart { display: none; }
+      .cine-hud { display: none; }
+      .arco { grid-template-columns: 1fr; }
+      .beat span { display: none; }
+    }
+  </style>
+</head>
+<body class="p-emotions cargando">
+
+  <div class="boot" aria-hidden="true">
+    <div class="boot-inner">
+      <p class="boot-label">INSERTANDO CARTUCHO 02</p>
+      <p class="boot-name grano">EMOTIONS</p>
+      <div class="boot-bar"><i></i></div>
+      <p class="boot-label">CLIC PARA SALTAR</p>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <a class="back" href="proyectos.html#short-film" data-salir><span>◀</span> PROYECTOS</a>
+    <div class="xp">EXP <div class="xp-bar"><i></i></div></div>
+    <p class="topbar-tag">SHORT FILM · 02/04</p>
+  </header>
+  <nav class="niveles" aria-label="Secciones"></nav>
+
+  <main class="pagina">
+
+    <!-- ================= HERO: fotograma con franjas de cine ================= -->
+    <section class="cine" id="inicio" data-nivel="INICIO">
+      <img class="cine-img" src="assets/proyectos/emotions/noche.jpg" alt="Fotograma de Emotions: ella se cubre la boca mientras él camina detrás" />
+      <div class="franja arriba"></div>
+      <div class="franja abajo"></div>
+      <div class="cine-hud"><span><b>●</b> REC</span><span>00:00:14</span><span>1920×1080</span></div>
+      <div class="cine-texto">
+        <p class="chip"><b></b> SHORT FILM · CORTOMETRAJE</p>
+        <h1 class="titulo-cine" aria-label="Emotions"><span style="--i:0">E</span><span style="--i:1">m</span><span style="--i:2">o</span><span style="--i:3">t</span><span style="--i:4">i</span><span style="--i:5">o</span><span style="--i:6">n</span><span style="--i:7">s</span></h1>
+        <p class="cine-sub">Lo que se siente antes de poder decirlo.</p>
+        <dl class="ficha">
+          <div><dt>DIRECCIÓN</dt><dd>Samuel Parada &amp; Andrés Claros</dd></div>
+          <div><dt>GUION Y PRODUCCIÓN</dt><dd>Andrés Claros &amp; Samuel Parada</dd></div>
+          <div><dt>REPARTO</dt><dd>Johan Ospina &amp; Isabella Rodríguez</dd></div>
+          <div><dt>FORMATO</dt><dd>Cortometraje · 1080p</dd></div>
+        </dl>
+        <a class="empezar" href="#ver">VER EL TEASER <span>▼</span></a>
+      </div>
+      <div class="hero-cart cine-cart">
+        <div class="flota"><span class="cartucho"><span><img src="assets/cartuchos/short-film.jpg" alt="Cartucho de Emotions" /></span></span></div>
+      </div>
+    </section>
+
+    <!-- ================= NIVEL 1: VER ================= -->
+    <section class="sec" id="ver" data-nivel="TEASER">
+      <div class="sec-head">
+        <p class="nivel rv">NIVEL 1 · EL TEASER</p>
+        <h2 class="rv" style="--d:.06s">Catorce segundos, <span class="acento">ni una palabra</span>.</h2>
+      </div>
+      <div class="pantalla rv" style="--d:.1s">
+        <div data-video>
+          <video src="assets/proyectos/emotions/emotions.mp4" poster="assets/proyectos/emotions/titulo.jpg" preload="metadata" playsinline></video>
+          <button class="play" aria-label="Reproducir el teaser"><i>▶</i><span>REPRODUCIR</span></button>
+        </div>
+        <div class="pantalla-pie pie"><span><b>TEASER</b> · 0:14</span><span>1920 × 1080 · H.264</span></div>
+      </div>
+    </section>
+
+    <!-- ================= NIVEL 2: LA HISTORIA ================= -->
+    <section class="sec" id="historia" data-nivel="HISTORIA">
+      <div class="dos-col">
+        <figure class="rv">
+          <div class="shot" style="aspect-ratio:16/9"><img src="assets/proyectos/emotions/prueba.jpg" alt="Una prueba de embarazo en primer plano; ella, desenfocada, al fondo" loading="lazy" /></div>
+          <figcaption><b>PLANO FINAL</b> · El objeto cuenta lo que nadie dice</figcaption>
+        </figure>
+        <div>
+          <p class="nivel rv">NIVEL 2 · LA HISTORIA</p>
+          <p class="cita rv" style="--d:.06s">Una pareja, una noche y <em>una prueba</em> que lo cambia todo.</p>
+          <p class="txt rv" style="--d:.12s">Emotions sigue lo que pasa entre dos personas cuando la noticia llega antes que las palabras: la cercanía del principio, la distancia que aparece de golpe y el silencio de quien todavía no sabe cómo decirlo.</p>
+          <p class="txt rv" style="--d:.18s">Escribimos y dirigimos el corto entre dos. La regla fue <strong>contar con la imagen</strong>: casi sin diálogo, con la luz, el encuadre y el foco haciendo el trabajo.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= NIVEL 3: ARCO EMOCIONAL ================= -->
+    <section class="sec" id="arco" data-nivel="ESTRUCTURA">
+      <div class="sec-head">
+        <p class="nivel rv">NIVEL 3 · ESTRUCTURA</p>
+        <h2 class="rv" style="--d:.06s">El recorrido emocional, <span class="acento">en cinco planos</span>.</h2>
+        <p class="lead rv" style="--d:.12s">El teaser sube la tensión plano a plano y guarda la razón para el final. Pasa el mouse por cada punto de la curva.</p>
+      </div>
+      <div class="arco">
+        <div class="arco-grafico diagrama rv" id="arcoGrafico">
+          <svg viewBox="0 0 1000 420" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="arcoGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#ff5a64" stop-opacity=".28" />
+                <stop offset="1" stop-color="#ff5a64" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+            <path class="area" d="M0 300 C 60 290, 60 260, 80 260 C 180 260, 220 205, 300 200 C 390 195, 440 165, 520 160 C 600 155, 650 60, 720 58 C 800 56, 860 130, 920 126 C 960 124, 990 130, 1000 132 L1000 420 L0 420 Z" />
+            <path class="curva" pathLength="1000" d="M0 300 C 60 290, 60 260, 80 260 C 180 260, 220 205, 300 200 C 390 195, 440 165, 520 160 C 600 155, 650 60, 720 58 C 800 56, 860 130, 920 126 C 960 124, 990 130, 1000 132" />
+          </svg>
+          <span class="eje y">TENSIÓN ▲</span>
+          <span class="eje x">TIEMPO ▶</span>
+          <button class="beat activo" style="--x:8%;--y:62%;--i:0" data-img="espalda" data-t="Intimidad" data-p="Penumbra y planos cerrados: la historia empieza en lo más cercano, casi sin luz."><span>01</span></button>
+          <button class="beat" style="--x:30%;--y:47.6%;--i:1" data-img="silueta" data-t="Cercanía" data-p="Una silueta recortada contra la ventana. Lo que se intuye pesa más que lo que se ve."><span>02</span></button>
+          <button class="beat" style="--x:52%;--y:38%;--i:2" data-img="encuentro" data-t="El encuentro" data-p="Afuera y de día la distancia se nota: los dos en el mismo plano, cada uno en su espacio."><span>03</span></button>
+          <button class="beat" style="--x:72%;--y:13.8%;--i:3" data-img="noche" data-t="El quiebre" data-p="Ella se rompe en primer plano mientras él queda fuera de foco, alejándose detrás."><span>04</span></button>
+          <button class="beat" style="--x:92%;--y:30%;--i:4" data-img="prueba" data-t="La prueba" data-p="El objeto en primer plano lo explica todo sin una sola línea de diálogo. Fundido al título."><span>05</span></button>
+        </div>
+        <div class="arco-detalle rv" style="--d:.1s">
+          <div class="shot" data-grupo="arco"><img id="arcoImg" src="assets/proyectos/emotions/espalda.jpg" alt="Fotograma del momento seleccionado" /></div>
+          <span class="arco-num" id="arcoNum">PLANO 01 / 05</span>
+          <p class="arco-titulo" id="arcoTitulo">Intimidad</p>
+          <p class="txt" id="arcoTexto">Penumbra y planos cerrados: la historia empieza en lo más cercano, casi sin luz.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= NIVEL 4: FOTOGRAFÍA ================= -->
+    <section class="sec" id="fotografia" data-nivel="FOTOGRAFÍA">
+      <div class="sec-head">
+        <p class="nivel rv">NIVEL 4 · FOTOGRAFÍA</p>
+        <h2 class="rv" style="--d:.06s">Luz baja, piel cálida y <span class="acento">un solo rojo</span>.</h2>
+        <p class="lead rv" style="--d:.12s">Casi todo el corto vive en penumbra, con luz de lámpara y tonos tierra. El único color fuerte es el rojo —la chaqueta, la tapa de la prueba—, y aparece justo en los momentos de tensión.</p>
+      </div>
+
+      <p class="arrastra-pista rv">ARRASTRA LA PELÍCULA <span>▶</span></p>
+      <div class="pelicula rv" data-arrastre>
+        <div class="cuadro"><figure class="shot" data-grupo="pelicula"><img src="assets/proyectos/emotions/espalda.jpg" alt="Plano 1: intimidad" loading="lazy" /><figcaption hidden>Plano 1 · Intimidad</figcaption></figure></div>
+        <div class="cuadro"><figure class="shot" data-grupo="pelicula"><img src="assets/proyectos/emotions/silueta.jpg" alt="Plano 2: silueta" loading="lazy" /><figcaption hidden>Plano 2 · Cercanía</figcaption></figure></div>
+        <div class="cuadro"><figure class="shot" data-grupo="pelicula"><img src="assets/proyectos/emotions/encuentro.jpg" alt="Plano 3: el encuentro" loading="lazy" /><figcaption hidden>Plano 3 · El encuentro</figcaption></figure></div>
+        <div class="cuadro"><figure class="shot" data-grupo="pelicula"><img src="assets/proyectos/emotions/noche.jpg" alt="Plano 4: el quiebre" loading="lazy" /><figcaption hidden>Plano 4 · El quiebre</figcaption></figure></div>
+        <div class="cuadro"><figure class="shot" data-grupo="pelicula"><img src="assets/proyectos/emotions/prueba.jpg" alt="Plano 5: la prueba" loading="lazy" /><figcaption hidden>Plano 5 · La prueba</figcaption></figure></div>
+        <div class="cuadro"><figure class="shot" data-grupo="pelicula"><img src="assets/proyectos/emotions/titulo.jpg" alt="Título y créditos" loading="lazy" /><figcaption hidden>Título · Emotions</figcaption></figure></div>
+      </div>
+
+      <div class="tres-col" style="margin-top:clamp(50px,8vh,90px)">
+        <div class="estudio rv">
+          <div class="shot" data-grupo="color"><img src="assets/proyectos/emotions/noche.jpg" alt="Estudio de color: el quiebre" loading="lazy" /></div>
+          <h3>El quiebre</h3>
+          <canvas data-barcode="assets/proyectos/emotions/noche.jpg" aria-label="Código de barras de color del plano"></canvas>
+          <div data-paleta="assets/proyectos/emotions/noche.jpg"></div>
+        </div>
+        <div class="estudio rv" style="--d:.1s">
+          <div class="shot" data-grupo="color"><img src="assets/proyectos/emotions/silueta.jpg" alt="Estudio de color: cercanía" loading="lazy" /></div>
+          <h3>Cercanía</h3>
+          <canvas data-barcode="assets/proyectos/emotions/silueta.jpg" aria-label="Código de barras de color del plano"></canvas>
+          <div data-paleta="assets/proyectos/emotions/silueta.jpg"></div>
+        </div>
+        <div class="estudio rv" style="--d:.2s">
+          <div class="shot" data-grupo="color"><img src="assets/proyectos/emotions/prueba.jpg" alt="Estudio de color: la prueba" loading="lazy" /></div>
+          <h3>La prueba</h3>
+          <canvas data-barcode="assets/proyectos/emotions/prueba.jpg" aria-label="Código de barras de color del plano"></canvas>
+          <div data-paleta="assets/proyectos/emotions/prueba.jpg"></div>
+        </div>
+      </div>
+      <p class="pie rv" style="margin-top:18px"><b>CÓMO LEERLO</b> · cada franja es el color promedio de una columna del plano; abajo, sus cinco colores dominantes.</p>
+    </section>
+
+    <!-- ================= NIVEL 5: CRÉDITOS ================= -->
+    <section class="sec" id="creditos" data-nivel="CRÉDITOS">
+      <div class="dos-col">
+        <div>
+          <p class="nivel rv">NIVEL 5 · CRÉDITOS</p>
+          <h2 class="rv" style="--d:.06s">Hecho <span class="acento">entre amigos</span>.</h2>
+          <p class="lead rv" style="--d:.12s">Un corto independiente: dos directores, dos actores y un grupo de personas que prestó su tiempo y su casa. Pasa el mouse sobre los créditos para detenerlos.</p>
+        </div>
+        <div class="creditos rv" style="--d:.1s">
+          <div class="rollo">
+            <h3>Emotions</h3>
+            <dl>
+              <dt>DIRIGIDO POR</dt><dd>Samuel Parada<br />Andrés Claros</dd>
+              <dt>PROTAGONIZADO POR</dt><dd>Johan Ospina<br />Isabella Rodríguez</dd>
+              <dt>PRODUCCIÓN &amp; GUION</dt><dd>Andrés Claros<br />Samuel Parada</dd>
+              <dt>AGRADECIMIENTO ESPECIAL</dt><dd>Rafael Manzanera<br />Daniel Rodríguez<br />Rusbell Castillo<br />Andrea Rozo</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SIGUIENTE ================= -->
+    <section class="sec" style="padding-top:20px">
+      <a class="siguiente rv" href="arma-skayn.html" data-salir>
+        <span class="cartucho"><span><img src="assets/cartuchos/3d-modeling.jpg" alt="" /></span></span>
+        <div>
+          <small>SIGUIENTE CARTUCHO · 03/04</small>
+          <strong class="grano">ARMA SKAYN</strong>
+          <em>▶ INSERTAR CARTUCHO</em>
+        </div>
+      </a>
+    </section>
+
+    <footer class="pie-pagina">
+      <span>ANDRES CLAROS · PORTAFOLIO</span>
+      <a href="proyectos.html#short-film" data-salir>VOLVER A PROYECTOS ▲</a>
+    </footer>
+  </main>
+
+  <div class="grain" aria-hidden="true"></div>
+  <div class="salida" aria-hidden="true"></div>
+  <script src="proyecto.js"></script>
+  <script>
+    // ---------- Emotions: puntos del arco emocional ----------
+    const beats = [...document.querySelectorAll(".beat")];
+    const arcoImg = document.getElementById("arcoImg");
+    function verBeat(b) {
+      if (b.classList.contains("activo")) return;
+      beats.forEach((x) => x.classList.toggle("activo", x === b));
+      const i = beats.indexOf(b);
+      arcoImg.classList.add("cambiando");
+      setTimeout(() => {
+        arcoImg.src = `assets/proyectos/emotions/${b.dataset.img}.jpg`;
+        arcoImg.classList.remove("cambiando");
+      }, 200);
+      document.getElementById("arcoNum").textContent = `PLANO 0${i + 1} / 05`;
+      document.getElementById("arcoTitulo").textContent = b.dataset.t;
+      document.getElementById("arcoTexto").textContent = b.dataset.p;
+      tono(330 + i * 90, 0.09, "triangle");
+    }
+    beats.forEach((b) => {
+      b.addEventListener("pointerenter", () => verBeat(b));
+      b.addEventListener("click", () => verBeat(b));
+    });
+  </script>
+</body>
+</html>

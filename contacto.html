@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contáctame — Andres Claros</title>
+  <meta name="description" content="Escríbele a Andres Claros: branding, cortometrajes, modelado 3D y diseño de apps." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Doto:wght@800;900&family=Press+Start+2P&family=Silkscreen:wght@700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="proyecto.css" />
+  <style>
+    /* =========================================================
+       CONTÁCTAME
+       ========================================================= */
+    .contacto {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1.05fr;
+      gap: clamp(30px, 5vw, 80px);
+      align-items: center;
+      padding: 110px var(--gutter) 60px;
+      max-width: calc(var(--maxw) + 2 * var(--gutter));
+      margin: 0 auto;
+    }
+    .contacto h1 {                   /* una sola línea: 8 letras en Press Start ≈ 8em de ancho */
+      margin: 22px 0 20px;
+      font: 400 clamp(30px, 4.4vw, 62px) var(--f-pixel);
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .contacto .lead { max-width: 46ch; }
+
+    /* tarjeta del correo */
+    /* canales: correo, WhatsApp e Instagram */
+    .canales { display: grid; gap: 10px; margin-top: 34px; max-width: 540px; }
+    .canal {
+      display: grid;
+      grid-template-columns: 46px 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: linear-gradient(160deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .015));
+      box-shadow: inset 0 0 0 1px var(--line);
+      transition: box-shadow .3s, translate .3s cubic-bezier(.2, .9, .25, 1);
+    }
+    .canal:hover { translate: 6px 0; box-shadow: inset 0 0 0 1px var(--acc), 0 0 26px var(--acc-glow); }
+    .canal-ico {
+      width: 46px; height: 46px;
+      display: grid; place-items: center;
+      border-radius: 12px;
+      color: #fff;
+      background: linear-gradient(180deg, #9d6cff, #6b3fd4);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), inset 0 -3px 0 rgba(40, 10, 100, .45);
+    }
+    .canal-ico svg { width: 22px; height: 22px; shape-rendering: crispEdges; transition: rotate .3s; }
+    .canal:hover .canal-ico svg { rotate: -8deg; }
+    .canal small { display: block; font: 800 11px var(--f-ui); letter-spacing: .22em; color: var(--dim); margin-bottom: 4px; }
+    .canal strong { display: block; font: 600 clamp(15px, 1.35vw, 18px) var(--f-body); color: var(--ink); word-break: break-word; }
+    .canal-acc { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    .canal .btn-px { padding: 10px 12px; font-size: 9px; }
+    .canal-doble .canal-acc { grid-column: 2 / -1; justify-content: flex-start; }   /* el correo es largo: botones debajo */
+    .correo-btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+    .btn-px.copiado { color: #120a1e; background: var(--acc); }
+
+    /* consola con el formulario */
+    .consola {
+      position: relative;
+      border-radius: 20px;
+      background: linear-gradient(170deg, #1a0f2b, #0d0717);
+      box-shadow: inset 0 0 0 1px rgba(220, 188, 255, .18), 0 40px 80px rgba(0, 0, 0, .55), 0 0 60px rgba(150, 90, 255, .18);
+      overflow: hidden;
+    }
+    .consola-barra {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 14px 20px;
+      font: 400 9px var(--f-pixel);
+      letter-spacing: .1em;
+      color: var(--lilac);
+      background: rgba(255, 255, 255, .04);
+      border-bottom: 1px solid var(--line);
+    }
+    .consola-barra i { display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: #ff5a64; box-shadow: 0 0 8px #ff5a64; animation: parpadeo 1.4s steps(1) infinite; }
+    .consola-cuerpo { position: relative; }
+    .consola form { display: grid; gap: 26px; padding: clamp(20px, 3vw, 34px); }
+    .paso { display: grid; gap: 12px; }
+    .paso-titulo { font: 700 14px var(--f-title); letter-spacing: .1em; color: var(--ink); }
+    .paso-titulo b { color: var(--acc); margin-right: 8px; }
+
+    /* cartuchos para elegir */
+    .elegir { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+    .opc {
+      display: grid; justify-items: center; gap: 8px;
+      padding: 10px 6px 12px;
+      border-radius: 12px;
+      font: 700 10px var(--f-title);
+      letter-spacing: .06em;
+      text-align: center;
+      color: var(--dim);
+      box-shadow: inset 0 0 0 1px var(--line);
+      transition: color .25s, box-shadow .25s, background .25s, translate .3s cubic-bezier(.2, .9, .25, 1);
+    }
+    .opc .mini { width: 100%; max-width: 70px; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .5)); transition: rotate .3s, translate .3s cubic-bezier(.2, .9, .25, 1); }
+    .opc .mini > span { display: block; clip-path: var(--silueta); }
+    .opc .otro {
+      width: 100%; max-width: 70px; aspect-ratio: 560 / 616;
+      display: grid; place-items: center;
+      font: 400 18px var(--f-pixel);
+      color: var(--lilac);
+      clip-path: var(--silueta);
+      background: repeating-linear-gradient(45deg, rgba(220, 188, 255, .12) 0 6px, rgba(220, 188, 255, .04) 6px 12px);
+    }
+    .opc:hover { color: var(--ink); translate: 0 -3px; }
+    .opc:hover .mini { rotate: -4deg; }
+    .opc[aria-pressed="true"] { color: var(--ink); background: rgba(196, 155, 255, .1); box-shadow: inset 0 0 0 2px var(--acc), 0 0 22px var(--acc-glow); }
+    .opc[aria-pressed="true"] .mini { translate: 0 -6px; }
+
+    /* campos */
+    .campo {
+      width: 100%;
+      padding: 14px 16px;
+      border: 0;
+      border-radius: 12px;
+      font: 500 16px var(--f-body);
+      color: var(--ink);
+      background: rgba(0, 0, 0, .35);
+      box-shadow: inset 0 0 0 1px rgba(220, 188, 255, .2);
+      outline: none;
+      transition: box-shadow .25s, background .25s;
+    }
+    .campo::placeholder { color: rgba(244, 236, 255, .35); }
+    .campo:focus { background: rgba(0, 0, 0, .5); box-shadow: inset 0 0 0 2px var(--acc), 0 0 20px var(--acc-glow); }
+    textarea.campo { min-height: 140px; resize: vertical; line-height: 1.55; }
+    .campo.error { box-shadow: inset 0 0 0 2px #ff5a64; animation: temblor .35s; }
+    .contador { display: flex; align-items: center; gap: 10px; font: 800 11px var(--f-ui); letter-spacing: .14em; color: var(--dim); }
+    .contador .xp-bar { width: 120px; }
+
+    /* botón enviar (mismo lenguaje del CONTÁCTAME del inicio) */
+    .enviar {
+      justify-self: start;
+      display: inline-flex; align-items: center; gap: 12px;
+      padding: 16px 26px;
+      border-radius: 12px;
+      font: 400 12px var(--f-pixel);
+      letter-spacing: .08em;
+      color: #fff;
+      background: linear-gradient(180deg, #9d6cff, #6b3fd4);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -4px 0 rgba(40, 10, 100, .5), 0 12px 26px rgba(10, 0, 30, .45), 0 0 24px rgba(170, 110, 255, .35);
+      transition: translate .2s, box-shadow .3s, filter .3s;
+    }
+    .enviar:hover { filter: brightness(1.1); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -4px 0 rgba(40, 10, 100, .5), 0 14px 30px rgba(10, 0, 30, .5), 0 0 40px rgba(185, 130, 255, .6); }
+    .enviar:hover span { animation: nudgeX .5s steps(2) infinite; }
+    .enviar:active { translate: 0 3px; }
+    .envios { display: flex; flex-wrap: wrap; gap: 12px; }
+    .enviar.secundario { background: rgba(255, 255, 255, .04); box-shadow: inset 0 0 0 2px rgba(196, 155, 255, .55); }
+    .enviar.secundario:hover { background: rgba(196, 155, 255, .14); box-shadow: inset 0 0 0 2px var(--acc), 0 0 30px var(--acc-glow); }
+    .nota { font-size: 13px; line-height: 1.5; color: var(--dim); }
+
+    /* pantalla de "mensaje listo" */
+    .listo {
+      position: absolute; inset: 0;
+      display: grid; place-content: center; justify-items: center; gap: 16px;
+      padding: 30px;
+      text-align: center;
+      background: radial-gradient(circle at 50% 40%, #241338, #0d0717 70%);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .4s, visibility .4s;
+    }
+    .consola.enviado .listo { opacity: 1; visibility: visible; }
+    .consola.enviado .listo > * { animation: crtOnPage .6s cubic-bezier(.2, .9, .25, 1) both; }
+    .listo .sobre-grande { width: 90px; color: var(--acc); filter: drop-shadow(0 0 18px var(--acc-glow)); animation: flotar 3s ease-in-out infinite; }
+    .listo h2 { font: 400 clamp(18px, 2.2vw, 26px) var(--f-pixel); }
+    .listo p { max-width: 38ch; font-size: 16px; line-height: 1.55; color: var(--txt); }
+    .listo .correo-btns { justify-content: center; }
+
+    /* destello de llegada desde la TV del inicio */
+    .llegada {
+      position: fixed; inset: 0; z-index: 80; pointer-events: none;
+      background: radial-gradient(circle at var(--cx, 50%) var(--cy, 50%), #fff 0%, #e9d8ff 18%, rgba(150, 90, 255, .5) 40%, #000 75%);
+      animation: llegada .9s cubic-bezier(.3, 0, .2, 1) forwards;
+    }
+
+    @keyframes temblor { 25% { translate: -6px 0; } 50% { translate: 5px 0; } 75% { translate: -3px 0; } }
+    @keyframes llegada { to { opacity: 0; } }
+
+    @media (max-width: 900px) {
+      .contacto { grid-template-columns: 1fr; padding-top: 96px; }
+      .elegir { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 520px) {
+      .canal { grid-template-columns: 46px 1fr; }
+      .canal-acc, .canal > .btn-px { grid-column: 2; justify-self: start; justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body class="p-contacto">
+
+  <header class="topbar">
+    <a class="back" id="volver" href="index.html" data-salir><span>◀</span> VOLVER</a>
+    <span></span>
+    <p class="topbar-tag">CONTACTO · PLAYER 2</p>
+  </header>
+
+  <main class="pagina">
+    <section class="contacto">
+
+      <!-- ================= TEXTO + CORREO ================= -->
+      <div>
+        <p class="chip rv"><b></b> PLAYER 2 · ¿JUGAMOS?</p>
+        <h1 class="grano rv" style="--d:.08s">CONTACTO</h1>
+        <p class="lead rv" style="--d:.16s">¿Tienes una marca por construir, una historia por filmar, algo que modelar o una app por diseñar? Cuéntame la idea y la convertimos en el <strong>siguiente cartucho</strong>.</p>
+
+        <!-- canales directos (íconos pixel de 9×9) -->
+        <div class="canales">
+          <div class="canal canal-doble rv" style="--d:.22s">
+            <span class="canal-ico"><svg viewBox="0 0 9 9" aria-hidden="true"><path fill="currentColor" d="M0 1h9v1H0zM0 7h9v1H0zM0 2h1v5H0zM8 2h1v5H8zM1 2h1v1H1zM2 3h1v1H2zM3 4h1v1H3zM4 5h1v1H4zM5 4h1v1H5zM6 3h1v1H6zM7 2h1v1H7z"/></svg></span>
+            <div><small>CORREO</small><strong>aclarosb@unbosque.edu.co</strong></div>
+            <div class="canal-acc">
+              <button class="btn-px" type="button" data-copiar>COPIAR</button>
+              <a class="btn-px" href="mailto:aclarosb@unbosque.edu.co">ABRIR ▶</a>
+            </div>
+          </div>
+          <a class="canal rv" style="--d:.28s" href="https://wa.me/573147846551" target="_blank" rel="noopener">
+            <span class="canal-ico"><svg viewBox="0 0 9 9" aria-hidden="true"><path fill="currentColor" d="M2 0h5v1H2zM1 1h1v1H1zM7 1h1v1H7zM0 2h1v6H0zM8 2h1v5H8zM7 7h1v1H7zM1 7h1v1H1zM2 8h5v1H2zM2 2h2v1H2zM2 3h1v1H2zM3 4h1v1H3zM4 5h2v1H4zM5 6h2v1H5z"/></svg></span>
+            <div><small>WHATSAPP</small><strong>+57 314 784 6551</strong></div>
+            <span class="btn-px">CHATEAR ▶</span>
+          </a>
+          <a class="canal rv" style="--d:.34s" href="https://instagram.com/claross.andres" target="_blank" rel="noopener">
+            <span class="canal-ico"><svg viewBox="0 0 9 9" aria-hidden="true"><path fill="currentColor" d="M1 0h7v1H1zM1 8h7v1H1zM0 1h1v7H0zM8 1h1v7H8zM3 2h3v1H3zM3 6h3v1H3zM2 3h1v3H2zM6 3h1v3H6zM6 1h1v1H6z"/></svg></span>
+            <div><small>INSTAGRAM</small><strong>@claross.andres</strong></div>
+            <span class="btn-px">VER PERFIL ↗</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- ================= CONSOLA: FORMULARIO ================= -->
+      <div class="consola rv" id="consola" style="--d:.15s">
+        <div class="consola-barra"><span><i></i>NUEVA PARTIDA</span><span>1P</span></div>
+
+        <div class="consola-cuerpo">
+        <form id="form" novalidate>
+          <div class="paso">
+            <p class="paso-titulo"><b>1</b>ELIGE TU CARTUCHO</p>
+            <div class="elegir">
+              <button type="button" class="opc" aria-pressed="false" data-tipo="Branding"><span class="mini"><span><img src="assets/cartuchos/branding.jpg" alt="" /></span></span>BRANDING</button>
+              <button type="button" class="opc" aria-pressed="false" data-tipo="Short film"><span class="mini"><span><img src="assets/cartuchos/short-film.jpg" alt="" /></span></span>SHORT FILM</button>
+              <button type="button" class="opc" aria-pressed="false" data-tipo="Modelado 3D"><span class="mini"><span><img src="assets/cartuchos/3d-modeling.jpg" alt="" /></span></span>3D</button>
+              <button type="button" class="opc" aria-pressed="false" data-tipo="App design"><span class="mini"><span><img src="assets/cartuchos/app-design.jpg" alt="" /></span></span>APP DESIGN</button>
+              <button type="button" class="opc" aria-pressed="false" data-tipo="Otro"><span class="otro">?</span>OTRO</button>
+            </div>
+          </div>
+
+          <label class="paso">
+            <span class="paso-titulo"><b>2</b>¿CÓMO TE LLAMAS?</span>
+            <input class="campo" id="nombre" name="nombre" type="text" autocomplete="name" placeholder="Tu nombre o el de tu marca" />
+          </label>
+
+          <label class="paso">
+            <span class="paso-titulo"><b>3</b>CUÉNTAME LA IDEA</span>
+            <textarea class="campo" id="mensaje" name="mensaje" maxlength="800" placeholder="Qué quieres hacer, para cuándo y cualquier referencia que tengas…"></textarea>
+            <span class="contador">EXP <span class="xp-bar"><i id="barraMensaje"></i></span><span id="cuenta">0 / 800</span></span>
+          </label>
+
+          <div class="envios">
+            <button class="enviar" type="submit" value="whatsapp">POR WHATSAPP <span>▶</span></button>
+            <button class="enviar secundario" type="submit" value="correo">POR CORREO <span>▶</span></button>
+          </div>
+          <p class="nota">Se abrirá WhatsApp o tu app de correo con el mensaje ya escrito; solo tienes que darle enviar.</p>
+        </form>
+
+        <div class="listo" aria-live="polite">
+          <svg class="sobre-grande" viewBox="0 0 9 7" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M0 0h9v1H0zM0 6h9v1H0zM0 1h1v5H0zM8 1h1v5H8zM1 1h1v1H1zM2 2h1v1H2zM3 3h1v1H3zM4 4h1v1H4zM5 3h1v1H5zM6 2h1v1H6zM7 1h1v1H7z"/></svg>
+          <h2 class="grano">MENSAJE LISTO</h2>
+          <p id="listoTexto">Se abrió tu app de correo con todo escrito. Si no se abrió, copia mi correo y escríbeme directo.</p>
+          <div class="correo-btns">
+            <a class="btn-px" href="https://wa.me/573147846551" target="_blank" rel="noopener">WHATSAPP ▶</a>
+            <button class="btn-px" type="button" data-copiar>COPIAR CORREO</button>
+            <button class="btn-px" type="button" id="otraVez">◀ NUEVA PARTIDA</button>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="pie-pagina">
+      <span>ANDRES CLAROS · PORTAFOLIO</span>
+      <a href="proyectos.html" data-salir>VER PROYECTOS ▶</a>
+    </footer>
+  </main>
+
+  <div class="grain" aria-hidden="true"></div>
+  <div class="salida" aria-hidden="true"></div>
+  <script>
+    // ---------- llegada: el destello sale del punto donde se apagó la TV del inicio ----------
+    try {
+      const warp = JSON.parse(sessionStorage.getItem("warp"));
+      if (warp) {
+        const l = document.createElement("div");
+        l.className = "llegada";
+        l.style.setProperty("--cx", warp.x + "%");
+        l.style.setProperty("--cy", warp.y + "%");
+        document.body.appendChild(l);
+        l.addEventListener("animationend", () => l.remove());
+        sessionStorage.removeItem("warp");
+      }
+    } catch {}
+    // "VOLVER" regresa a la página de donde vino (inicio, proyectos o un proyecto)
+    try {
+      const ref = new URL(document.referrer);
+      if (ref.origin === location.origin && !ref.pathname.endsWith("contacto.html")) {
+        document.getElementById("volver").href = ref.pathname.slice(1) + ref.hash || "index.html";
+      }
+    } catch {}
+  </script>
+  <script src="proyecto.js"></script>
+  <script>
+    // =========================================================
+    // CONTACTO
+    // =========================================================
+    const CORREO = "aclarosb@unbosque.edu.co";
+    const WHATSAPP = "573147846551";        // 57 = Colombia + número, sin espacios
+
+    // copiar el correo
+    document.querySelectorAll("[data-copiar]").forEach((b) => b.addEventListener("click", () => {
+      navigator.clipboard?.writeText(CORREO);
+      const antes = b.textContent;
+      b.classList.add("copiado");
+      b.textContent = "COPIADO ✓";
+      tono(980, 0.08);
+      setTimeout(() => { b.classList.remove("copiado"); b.textContent = antes; }, 1500);
+    }));
+
+    // elegir cartuchos (se pueden marcar varios)
+    document.querySelectorAll(".opc").forEach((o) => o.addEventListener("click", () => {
+      const on = o.getAttribute("aria-pressed") !== "true";
+      o.setAttribute("aria-pressed", on);
+      tono(on ? 760 : 420, 0.05);
+    }));
+
+    // contador del mensaje como barra de EXP
+    const mensaje = document.getElementById("mensaje");
+    const nombre = document.getElementById("nombre");
+    mensaje.addEventListener("input", () => {
+      const n = mensaje.value.length;
+      document.getElementById("cuenta").textContent = `${n} / 800`;
+      document.getElementById("barraMensaje").style.width = `${(n / 800) * 100}%`;
+    });
+    [nombre, mensaje].forEach((c) => c.addEventListener("input", () => c.classList.remove("error")));
+
+    // enviar: arma el mensaje y lo abre en WhatsApp o en la app de correo del visitante
+    const consola = document.getElementById("consola");
+    document.getElementById("form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const faltan = [nombre, mensaje].filter((c) => !c.value.trim());
+      faltan.forEach((c) => { c.classList.remove("error"); void c.offsetWidth; c.classList.add("error"); });
+      if (faltan.length) { faltan[0].focus(); tono(200, 0.18, "square", 120); return; }
+
+      const tipos = [...document.querySelectorAll('.opc[aria-pressed="true"]')].map((o) => o.dataset.tipo);
+      const quien = nombre.value.trim();
+      const cuerpo = `Hola Andrés, soy ${quien}.\n\n${mensaje.value.trim()}${tipos.length ? "\n\nTipo de proyecto: " + tipos.join(", ") : ""}`;
+      if (e.submitter?.value === "correo") {
+        const asunto = `Proyecto${tipos.length ? " · " + tipos.join(", ") : ""} — ${quien}`;
+        location.href = `mailto:${CORREO}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+        document.getElementById("listoTexto").textContent = "Se abrió tu app de correo con todo escrito. Si no se abrió, copia mi correo o escríbeme por WhatsApp.";
+      } else {
+        window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(cuerpo)}`, "_blank", "noopener");
+        document.getElementById("listoTexto").textContent = "Se abrió WhatsApp con tu mensaje listo, solo dale enviar. Si no se abrió, toca el botón de abajo.";
+      }
+
+      consola.classList.add("enviado");
+      tono(660, 0.08); setTimeout(() => tono(990, 0.1), 100); setTimeout(() => tono(1320, 0.14), 200);
+    });
+    document.getElementById("otraVez").addEventListener("click", () => {
+      consola.classList.remove("enviado");
+      tono(520, 0.06);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,789 @@
+/* =========================================================
+   VARIABLES
+   ========================================================= */
+:root {
+  --bg: #07070a;                 /* mismo tono que los bordes de la foto */
+  --ink: #f4ecff;
+  --ink-dim: rgba(244, 236, 255, .55);
+  --line: rgba(244, 236, 255, .14);
+  --purple: #9b5cff;
+  --orange: #ffad3b;
+  --orange-2: #ff7a12;
+  --orange-deep: #b8460a;
+
+  --f-ui: "Doto", ui-monospace, monospace;   /* dot-matrix: combina con el CRT */
+  --f-pixel: "Press Start 2P", monospace;
+
+  --gutter: clamp(16px, 3.2vw, 48px);
+  --hdr: 64px;                   /* donde empieza el borde superior de la TV */
+  --ftr: 118px;                  /* espacio para el botón */
+
+  /* Tamaño de la foto: la TV es la protagonista. Su cuerpo (≈68% del alto de la foto)
+     ocupa casi toda la altura y su ancho (53% de la foto) llega hasta el 84% de la ventana. */
+  --H: max(320px, min(calc((100vh - var(--hdr) - var(--ftr)) / .68), 88vw));
+  --W: calc(var(--H) * 1.7905);
+
+  /* grano para el botón CONTÁCTAME y el de sonido (puntitos claros y morados) */
+  --grain-light: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='2' seed='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 -.88'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>");
+  --grain-violet: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='11' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .3  0 0 0 0 .1  0 0 0 0 .55  0 0 0 1.3 -.8'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>");
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {                   /* luz ambiente morada detrás de todo */
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(60% 55% at 50% 42%, rgba(120, 50, 200, .16), transparent 70%);
+  pointer-events: none;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+/* =========================================================
+   HEADER: solo las 4 categorías repartidas a lo ancho
+   ========================================================= */
+.header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: var(--hdr);
+  padding: 0 var(--gutter);
+  display: flex;
+  align-items: center;
+  z-index: 30;
+}
+.nav {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.nav a {
+  position: relative;
+  padding: 8px 0;
+  font-family: var(--f-ui);
+  font-weight: 800;
+  font-size: clamp(14px, 1.15vw, 19px);
+  letter-spacing: .14em;
+  color: #a77bff;                                  /* morado, el mismo del botón de sonido */
+  text-shadow: 0 0 14px rgba(140, 80, 255, .45);
+  white-space: nowrap;
+  opacity: 0;
+  translate: 0 -12px;
+  animation: drift .9s cubic-bezier(.2, .9, .3, 1) forwards;
+  transition: color .3s, text-shadow .3s;
+}
+.nav a:nth-child(1) { animation-delay: 2s; }
+.nav a:nth-child(2) { animation-delay: 2.08s; }
+.nav a:nth-child(3) { animation-delay: 2.16s; }
+.nav a:nth-child(4) { animation-delay: 2.24s; }
+.nav a::before {                 /* flechita que aparece al pasar el mouse */
+  content: "▶";
+  position: absolute;
+  left: -1.1em;
+  top: 50%;
+  translate: 0 -50%;
+  font-size: .55em;
+  color: var(--orange);
+  opacity: 0;
+  transition: opacity .25s, left .3s cubic-bezier(.2, .9, .3, 1);
+}
+.nav a:hover { color: #d9c4ff; text-shadow: 0 0 10px rgba(167, 123, 255, .9), 0 0 24px rgba(140, 80, 255, .6); }
+.nav a:hover::before { opacity: 1; left: -1.6em; }
+
+/* =========================================================
+   ESCENA + PARALLAX
+   ========================================================= */
+.scene { position: fixed; inset: 0; perspective: 1400px; }
+.layer { position: absolute; inset: 0; will-change: transform; pointer-events: none; }
+
+/* La foto: todo lo de adentro se posiciona en % de la foto */
+.tv-photo {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--hdr) - var(--H) * .122);         /* borde superior de la TV */
+  width: var(--W);
+  height: var(--H);
+  translate: -50% 0;
+  transform-origin: 45.25% 45.8%;                   /* centro del vidrio: aquí hace zoom */
+  opacity: 0;
+  animation: dollyIn 1.9s .35s cubic-bezier(.16, 1, .3, 1) forwards;
+  /* al volver de "sobre mí" (Esc) la cámara se aleja con la misma curva */
+  transition: scale 1.1s cubic-bezier(.76, 0, .24, 1), translate 1.1s cubic-bezier(.76, 0, .24, 1);
+  /* funde los bordes de la foto con el fondo */
+  -webkit-mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent), linear-gradient(transparent, #000 8%, #000 90%, transparent);
+  -webkit-mask-composite: source-in;
+  mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent), linear-gradient(transparent, #000 8%, #000 90%, transparent);
+  mask-composite: intersect;
+}
+.tv-img, .glass {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+
+/* =========================================================
+   PANTALLA CRT
+   .screen ocupa toda la foto y se recorta con la forma exacta del vidrio
+   ========================================================= */
+.screen {
+  position: absolute;
+  inset: 0;
+  /* máscara incrustada (copia de assets/screen-mask.svg) para que funcione también al abrir el archivo directo */
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%202000%201117%22%20preserveAspectRatio%3D%22none%22%3E%20%3Cfilter%20id%3D%22f%22%20x%3D%22-5%25%22%20y%3D%22-5%25%22%20width%3D%22110%25%22%20height%3D%22110%25%22%3E%3CfeGaussianBlur%20stdDeviation%3D%221.8%22%2F%3E%3C%2Ffilter%3E%20%3Cpath%20fill%3D%22%23fff%22%20filter%3D%22url(%23f)%22%20d%3D%22M1237.8%20512C1237.9%20517.8%201238%20523.7%201238%20529.5C1238%20535.3%201237.9%20541%201237.8%20546.8C1237.7%20552.6%201237.5%20558.4%201237.3%20564.4C1237.1%20570.3%201237%20576.3%201236.8%20582.4C1236.7%20588.5%201236.5%20594.7%201236.4%20601C1236.2%20607.2%201236.1%20613.5%201235.9%20619.8C1235.8%20626.1%201235.6%20632.3%201235.3%20638.8C1235%20645.3%201234.6%20651.9%201234.1%20658.6C1233.6%20665.3%201233.1%20672.2%201232.4%20679.2C1231.8%20686.1%201231.2%20693.2%201230.3%20700.2C1229.4%20707.3%201228.6%20714.5%201227.1%20721.6C1225.7%20728.6%201224.4%20736%201221.8%20742.4C1219.1%20748.8%201216.1%20755.2%201211.4%20760C1206.7%20764.8%201200.3%20768.3%201193.5%20771.1C1186.7%20773.9%201178.4%20775.4%201170.7%20776.9C1163%20778.5%201154.9%20779.5%201147.3%20780.5C1139.7%20781.6%201132.4%20782.4%201125.2%20783.1C1118.1%20783.9%201111.2%20784.6%201104.4%20785.3C1097.6%20785.9%201090.9%20786.4%201084.3%20786.9C1077.7%20787.4%201071.3%20787.7%201065%20788C1058.7%20788.4%201052.7%20788.6%201046.7%20788.9C1040.7%20789.2%201034.9%20789.6%201029.1%20789.8C1023.3%20790.1%201017.6%20790.3%201012.1%20790.5C1006.5%20790.7%201001.1%20791%20995.8%20791.2C990.4%20791.4%20985.2%20791.7%20980%20791.9C974.7%20792%20969.5%20792%20964.4%20792.1C959.3%20792.2%20954.3%20792.2%20949.4%20792.3C944.4%20792.4%20939.5%20792.7%20934.6%20792.8C929.7%20792.9%20924.7%20793%20919.8%20793C914.9%20793%20909.9%20793%20905%20793C900.1%20793%20895.1%20793%20890.2%20793C885.3%20793%20880.3%20792.9%20875.4%20792.8C870.5%20792.7%20865.6%20792.4%20860.6%20792.3C855.7%20792.2%20850.7%20792.2%20845.6%20792.1C840.5%20792%20835.3%20792%20830%20791.9C824.8%20791.8%20819.4%20791.6%20814%20791.4C808.6%20791.3%20803%20791.2%20797.4%20791C791.9%20790.8%20786.3%20790.6%20780.6%20790.3C774.9%20790.1%20769.3%20789.7%20763.3%20789.4C757.4%20789.1%20751.3%20788.9%20745%20788.5C738.7%20788.2%20732.3%20787.9%20725.7%20787.4C719.1%20786.9%20712.3%20786.4%20705.4%20785.8C698.5%20785.1%20691.5%20784.4%20684.3%20783.6C677.1%20782.9%20669.8%20782%20662.2%20781C654.6%20780%20646.5%20779.2%20638.8%20777.7C631.1%20776.1%20622.8%20774.7%20616%20771.8C609.1%20769%20602.6%20765.3%20597.9%20760.5C593.1%20755.7%20589.9%20749.3%20587.2%20742.9C584.6%20736.5%20583.4%20728.9%20582.1%20721.8C580.8%20714.7%20580.1%20707.4%20579.2%20700.2C578.4%20693.1%20577.7%20686.1%20577.1%20679.2C576.5%20672.2%20576%20665.4%20575.7%20658.6C575.3%20651.9%20575%20645.3%20574.7%20638.8C574.4%20632.3%20574.1%20626%20573.8%20619.8C573.5%20613.5%20573.1%20607.4%20572.9%20601.2C572.6%20595.1%20572.3%20589%20572.2%20582.9C572%20576.8%20572%20570.6%20572%20564.6C571.9%20558.6%20572%20552.7%20572%20546.8C572%20541%20572%20535.3%20572%20529.5C572%20523.7%20572%20517.8%20572%20512C572%20506.2%20572.1%20500.3%20572.2%20494.5C572.4%20488.7%20572.7%20483%20573%20477.2C573.3%20471.4%20573.6%20465.5%20574%20459.6C574.3%20453.7%20574.6%20447.8%20574.9%20441.8C575.2%20435.9%20575.5%20429.9%20575.9%20423.8C576.2%20417.7%20576.6%20411.5%20577.1%20405.2C577.5%20399%20578%20392.7%20578.5%20386.4C579%20380.1%20579.5%20373.9%20580.2%20367.4C580.8%20360.9%20581.6%20354.3%20582.3%20347.6C583.1%20340.8%20583.8%20333.8%20584.7%20326.8C585.6%20319.7%20586.4%20312%20587.6%20305.2C588.8%20298.3%20590%20291.3%20591.7%20285.6C593.5%20279.9%20595.3%20275.2%20598.1%20271C600.9%20266.8%20603.9%20263.5%20608.5%20260.3C613.2%20257.2%20617.9%20254.6%20625.9%20252.2C634%20249.8%20644.3%20247.8%20656.7%20245.9C669.1%20244%20686.6%20242.3%20700.4%20240.9C714.3%20239.6%20729.2%20238.7%20739.8%20237.9C750.5%20237.2%20757.4%20237%20764.3%20236.6C771.3%20236.1%20776%20235.8%20781.6%20235.4C787.3%20235%20792.8%20234.5%20798.2%20234.2C803.6%20233.9%20808.9%20233.7%20814.2%20233.6C819.5%20233.4%20824.8%20233.3%20830%20233.1C835.3%20233%20840.5%20232.9%20845.6%20232.7C850.7%20232.5%20855.7%20232.2%20860.6%20232C865.6%20231.7%20870.5%20231.4%20875.4%20231.2C880.3%20231.1%20885.3%20231%20890.2%20231C895.1%20231%20900.1%20231%20905%20231C909.9%20231%20914.9%20230.8%20919.8%20230.7C924.7%20230.7%20929.6%20230.5%20934.6%20230.5C939.6%20230.5%20944.5%20230.7%20949.6%20230.7C954.7%20230.7%20960%20230.7%20965.2%20230.7C970.3%20230.6%20975.5%20230.5%20980.7%20230.6C985.9%20230.7%20991.1%20230.9%20996.5%20231.1C1001.9%20231.2%201007.5%20231.2%201013.1%20231.2C1018.7%20231.3%201024.3%20231.3%201030.1%20231.4C1036%20231.5%201042%20231.5%201048.2%20231.6C1054.4%20231.6%201060.8%20231.6%201067.2%20231.7C1073.7%20231.8%201080.3%20232%201087.1%20232.4C1093.8%20232.7%201100.6%20233.2%201107.6%20233.7C1114.7%20234.3%201121.7%20234.9%201129.2%20235.6C1136.7%20236.3%201144.8%20236.8%201152.6%20237.7C1160.4%20238.7%201168.8%20239.8%201175.9%20241.3C1183%20242.8%201189.8%20244.7%201195%20246.7C1200.3%20248.7%201204.1%20250.3%201207.5%20253.1C1210.8%20255.9%201212.9%20259%201215.1%20263.7C1217.4%20268.5%201219.3%20275%201221%20281.6C1222.7%20288.2%201224.2%20296%201225.4%20303.2C1226.6%20310.4%201227.4%20317.7%201228.3%20324.8C1229.1%20331.8%201229.8%20338.8%201230.4%20345.6C1231.1%20352.4%201231.6%20359%201232.1%20365.6C1232.6%20372.3%201232.9%20378.9%201233.3%20385.4C1233.6%20392%201233.9%20398.4%201234.2%20404.7C1234.5%20411%201234.8%20417.1%201235.1%20423.3C1235.5%20429.4%201235.8%20435.5%201236.1%20441.6C1236.4%20447.6%201236.6%20453.7%201236.8%20459.6C1237%20465.6%201236.9%20471.4%201237%20477.2C1237.1%20483%201237.1%20488.7%201237.3%20494.5C1237.4%20500.3%201237.6%20506.2%201237.8%20512Z%22%2F%3E%20%3C%2Fsvg%3E") 0 0 / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%202000%201117%22%20preserveAspectRatio%3D%22none%22%3E%20%3Cfilter%20id%3D%22f%22%20x%3D%22-5%25%22%20y%3D%22-5%25%22%20width%3D%22110%25%22%20height%3D%22110%25%22%3E%3CfeGaussianBlur%20stdDeviation%3D%221.8%22%2F%3E%3C%2Ffilter%3E%20%3Cpath%20fill%3D%22%23fff%22%20filter%3D%22url(%23f)%22%20d%3D%22M1237.8%20512C1237.9%20517.8%201238%20523.7%201238%20529.5C1238%20535.3%201237.9%20541%201237.8%20546.8C1237.7%20552.6%201237.5%20558.4%201237.3%20564.4C1237.1%20570.3%201237%20576.3%201236.8%20582.4C1236.7%20588.5%201236.5%20594.7%201236.4%20601C1236.2%20607.2%201236.1%20613.5%201235.9%20619.8C1235.8%20626.1%201235.6%20632.3%201235.3%20638.8C1235%20645.3%201234.6%20651.9%201234.1%20658.6C1233.6%20665.3%201233.1%20672.2%201232.4%20679.2C1231.8%20686.1%201231.2%20693.2%201230.3%20700.2C1229.4%20707.3%201228.6%20714.5%201227.1%20721.6C1225.7%20728.6%201224.4%20736%201221.8%20742.4C1219.1%20748.8%201216.1%20755.2%201211.4%20760C1206.7%20764.8%201200.3%20768.3%201193.5%20771.1C1186.7%20773.9%201178.4%20775.4%201170.7%20776.9C1163%20778.5%201154.9%20779.5%201147.3%20780.5C1139.7%20781.6%201132.4%20782.4%201125.2%20783.1C1118.1%20783.9%201111.2%20784.6%201104.4%20785.3C1097.6%20785.9%201090.9%20786.4%201084.3%20786.9C1077.7%20787.4%201071.3%20787.7%201065%20788C1058.7%20788.4%201052.7%20788.6%201046.7%20788.9C1040.7%20789.2%201034.9%20789.6%201029.1%20789.8C1023.3%20790.1%201017.6%20790.3%201012.1%20790.5C1006.5%20790.7%201001.1%20791%20995.8%20791.2C990.4%20791.4%20985.2%20791.7%20980%20791.9C974.7%20792%20969.5%20792%20964.4%20792.1C959.3%20792.2%20954.3%20792.2%20949.4%20792.3C944.4%20792.4%20939.5%20792.7%20934.6%20792.8C929.7%20792.9%20924.7%20793%20919.8%20793C914.9%20793%20909.9%20793%20905%20793C900.1%20793%20895.1%20793%20890.2%20793C885.3%20793%20880.3%20792.9%20875.4%20792.8C870.5%20792.7%20865.6%20792.4%20860.6%20792.3C855.7%20792.2%20850.7%20792.2%20845.6%20792.1C840.5%20792%20835.3%20792%20830%20791.9C824.8%20791.8%20819.4%20791.6%20814%20791.4C808.6%20791.3%20803%20791.2%20797.4%20791C791.9%20790.8%20786.3%20790.6%20780.6%20790.3C774.9%20790.1%20769.3%20789.7%20763.3%20789.4C757.4%20789.1%20751.3%20788.9%20745%20788.5C738.7%20788.2%20732.3%20787.9%20725.7%20787.4C719.1%20786.9%20712.3%20786.4%20705.4%20785.8C698.5%20785.1%20691.5%20784.4%20684.3%20783.6C677.1%20782.9%20669.8%20782%20662.2%20781C654.6%20780%20646.5%20779.2%20638.8%20777.7C631.1%20776.1%20622.8%20774.7%20616%20771.8C609.1%20769%20602.6%20765.3%20597.9%20760.5C593.1%20755.7%20589.9%20749.3%20587.2%20742.9C584.6%20736.5%20583.4%20728.9%20582.1%20721.8C580.8%20714.7%20580.1%20707.4%20579.2%20700.2C578.4%20693.1%20577.7%20686.1%20577.1%20679.2C576.5%20672.2%20576%20665.4%20575.7%20658.6C575.3%20651.9%20575%20645.3%20574.7%20638.8C574.4%20632.3%20574.1%20626%20573.8%20619.8C573.5%20613.5%20573.1%20607.4%20572.9%20601.2C572.6%20595.1%20572.3%20589%20572.2%20582.9C572%20576.8%20572%20570.6%20572%20564.6C571.9%20558.6%20572%20552.7%20572%20546.8C572%20541%20572%20535.3%20572%20529.5C572%20523.7%20572%20517.8%20572%20512C572%20506.2%20572.1%20500.3%20572.2%20494.5C572.4%20488.7%20572.7%20483%20573%20477.2C573.3%20471.4%20573.6%20465.5%20574%20459.6C574.3%20453.7%20574.6%20447.8%20574.9%20441.8C575.2%20435.9%20575.5%20429.9%20575.9%20423.8C576.2%20417.7%20576.6%20411.5%20577.1%20405.2C577.5%20399%20578%20392.7%20578.5%20386.4C579%20380.1%20579.5%20373.9%20580.2%20367.4C580.8%20360.9%20581.6%20354.3%20582.3%20347.6C583.1%20340.8%20583.8%20333.8%20584.7%20326.8C585.6%20319.7%20586.4%20312%20587.6%20305.2C588.8%20298.3%20590%20291.3%20591.7%20285.6C593.5%20279.9%20595.3%20275.2%20598.1%20271C600.9%20266.8%20603.9%20263.5%20608.5%20260.3C613.2%20257.2%20617.9%20254.6%20625.9%20252.2C634%20249.8%20644.3%20247.8%20656.7%20245.9C669.1%20244%20686.6%20242.3%20700.4%20240.9C714.3%20239.6%20729.2%20238.7%20739.8%20237.9C750.5%20237.2%20757.4%20237%20764.3%20236.6C771.3%20236.1%20776%20235.8%20781.6%20235.4C787.3%20235%20792.8%20234.5%20798.2%20234.2C803.6%20233.9%20808.9%20233.7%20814.2%20233.6C819.5%20233.4%20824.8%20233.3%20830%20233.1C835.3%20233%20840.5%20232.9%20845.6%20232.7C850.7%20232.5%20855.7%20232.2%20860.6%20232C865.6%20231.7%20870.5%20231.4%20875.4%20231.2C880.3%20231.1%20885.3%20231%20890.2%20231C895.1%20231%20900.1%20231%20905%20231C909.9%20231%20914.9%20230.8%20919.8%20230.7C924.7%20230.7%20929.6%20230.5%20934.6%20230.5C939.6%20230.5%20944.5%20230.7%20949.6%20230.7C954.7%20230.7%20960%20230.7%20965.2%20230.7C970.3%20230.6%20975.5%20230.5%20980.7%20230.6C985.9%20230.7%20991.1%20230.9%20996.5%20231.1C1001.9%20231.2%201007.5%20231.2%201013.1%20231.2C1018.7%20231.3%201024.3%20231.3%201030.1%20231.4C1036%20231.5%201042%20231.5%201048.2%20231.6C1054.4%20231.6%201060.8%20231.6%201067.2%20231.7C1073.7%20231.8%201080.3%20232%201087.1%20232.4C1093.8%20232.7%201100.6%20233.2%201107.6%20233.7C1114.7%20234.3%201121.7%20234.9%201129.2%20235.6C1136.7%20236.3%201144.8%20236.8%201152.6%20237.7C1160.4%20238.7%201168.8%20239.8%201175.9%20241.3C1183%20242.8%201189.8%20244.7%201195%20246.7C1200.3%20248.7%201204.1%20250.3%201207.5%20253.1C1210.8%20255.9%201212.9%20259%201215.1%20263.7C1217.4%20268.5%201219.3%20275%201221%20281.6C1222.7%20288.2%201224.2%20296%201225.4%20303.2C1226.6%20310.4%201227.4%20317.7%201228.3%20324.8C1229.1%20331.8%201229.8%20338.8%201230.4%20345.6C1231.1%20352.4%201231.6%20359%201232.1%20365.6C1232.6%20372.3%201232.9%20378.9%201233.3%20385.4C1233.6%20392%201233.9%20398.4%201234.2%20404.7C1234.5%20411%201234.8%20417.1%201235.1%20423.3C1235.5%20429.4%201235.8%20435.5%201236.1%20441.6C1236.4%20447.6%201236.6%20453.7%201236.8%20459.6C1237%20465.6%201236.9%20471.4%201237%20477.2C1237.1%20483%201237.1%20488.7%201237.3%20494.5C1237.4%20500.3%201237.6%20506.2%201237.8%20512Z%22%2F%3E%20%3C%2Fsvg%3E") 0 0 / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
+/* Rectángulo del vidrio (medido en la foto: x 572–1238, y 230–793 de 2000×1117) */
+.crt {
+  position: absolute;
+  left: 28.6%;
+  top: 20.64%;
+  width: 33.3%;
+  height: 50.36%;
+  container-type: size;
+  background:
+    radial-gradient(60% 45% at 50% 40%, rgba(220, 170, 255, .35), transparent 70%),        /* núcleo brillante del fósforo */
+    radial-gradient(120% 95% at 50% 42%, #9a5cf5 0%, #6f34e0 40%, #44199e 74%, #1d0647 100%);
+  transform-origin: 50% 50%;
+  transform: scale(1, .004);
+  opacity: 0;
+  filter: brightness(4);
+  animation: crtOn .9s 1s cubic-bezier(.2, .9, .25, 1) forwards, flicker 7s 3s infinite;
+}
+
+.crt-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 2cqh;
+  pointer-events: auto;
+  animation: glitch 7s 4s steps(1) infinite;
+}
+
+.crt-name {
+  display: flex;
+  gap: 2.4cqw;
+  font-family: var(--f-pixel);
+  font-size: 3.3cqw;
+  letter-spacing: .25em;
+  color: #ffe9cc;
+  /* separación de color típica de un CRT (rojo/cian desplazados) */
+  text-shadow: -.3cqw 0 rgba(255, 40, 130, .65), .3cqw 0 rgba(40, 220, 255, .55), 0 0 1.6cqw rgba(255, 210, 150, .6);
+  margin-bottom: 4.2cqh;
+}
+.crt-name span {
+  opacity: 0;
+  clip-path: inset(0 100% 0 0);
+  animation: type .7s steps(6) forwards;
+}
+.crt-name span:nth-child(1) { animation-delay: 1.6s; }
+.crt-name span:nth-child(2) { animation-delay: 2.05s; }
+
+.crt-title {
+  display: flex;
+  font-family: var(--f-pixel);
+  font-weight: 400;
+  font-size: 9.6cqw;
+  line-height: 1;
+}
+.crt-title span {
+  display: inline-block;
+  /* dos tonos de pixel art: franja clara arriba, naranja al medio, oscura abajo */
+  color: transparent;
+  background: linear-gradient(180deg, #fff0b8 0 22%, #ffc24d 22% 52%, #ff9a26 52% 78%, #f0700e 78%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter:
+    drop-shadow(.7cqw .7cqw 0 #8f2f04)
+    drop-shadow(-.25cqw 0 0 rgba(255, 40, 130, .5))
+    drop-shadow(.25cqw 0 0 rgba(40, 220, 255, .4))
+    drop-shadow(0 0 2.2cqw rgba(255, 160, 50, .55));
+  opacity: 0;
+  transform: translateY(-140%);
+  animation:
+    drop .55s cubic-bezier(.25, 1.7, .45, 1) forwards,
+    wave 2.6s ease-in-out infinite;
+  animation-delay: calc(1.8s + var(--i) * .06s), calc(2.9s + var(--i) * .12s);
+}
+
+.crt-projects {
+  position: relative;
+  margin-top: 9cqh;
+  display: flex;
+  align-items: center;
+  gap: 2.6cqw;
+  padding: 2cqh 4cqw;
+  font-family: var(--f-pixel);
+  font-size: 5.6cqw;
+  letter-spacing: .12em;
+  color: #fff7ea;
+  text-shadow: -.3cqw 0 rgba(255, 40, 130, .6), .3cqw 0 rgba(40, 220, 255, .5), 0 0 1.8cqw rgba(255, 220, 170, .7);
+  opacity: 0;
+  animation: crtPop .5s 2.5s cubic-bezier(.3, 1.6, .5, 1) both;
+  transition: color .15s, transform .15s;
+}
+.crt-projects .arrow {
+  font-size: .62em;
+  color: var(--orange);
+  animation: nudge .5s steps(2) infinite, blinkSoft 1s steps(1) infinite;
+}
+.crt-projects:hover,
+.crt-projects:focus-visible {
+  color: var(--orange);
+  transform: scale(1.06);
+  text-shadow: 0 0 2.4cqw rgba(255, 170, 60, .9), .4cqw .4cqw 0 rgba(60, 10, 120, .75);
+  outline: none;
+}
+
+/* ---------- Pantalla 2: sobre mí ---------- */
+.crt-about {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5.5cqh;
+  padding: 15cqh 12cqw 9cqh;     /* más aire arriba: el texto no toca el borde curvo del tubo */
+  font-family: "Pixelify Sans", var(--f-pixel);
+  color: #fbf2ff;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.about-text p {
+  /* párrafo largo: fuente de lectura (la pixel se pierde en bloques de texto) */
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-size: 3.05cqw;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: .005em;
+  text-align: left;              /* sin justificar: evita los huecos grandes entre palabras */
+  color: #fff;
+  /* contorno oscuro para separar del fondo + una separación de color mínima */
+  text-shadow:
+    0 .2cqw 0 rgba(30, 0, 70, .8),
+    -.07cqw 0 rgba(255, 60, 150, .35),
+    .07cqw 0 rgba(60, 220, 255, .28),
+    0 0 1cqw rgba(235, 200, 255, .3);
+}
+body.about .crt-dots { opacity: .5; transition: opacity .6s .7s; }   /* menos malla detrás del texto */
+.about-text p + p { margin-top: 3.6cqh; }
+.about-text .rest { visibility: hidden; }     /* reserva el espacio del texto que falta escribir */
+.about-text .typing::after {                 /* cursor de bloque */
+  content: "";
+  display: inline-block;
+  width: .55em; height: 1em;
+  margin-left: .1em;
+  vertical-align: -.12em;
+  background: #ffcf7a;
+  box-shadow: 0 0 1cqw #ffb347;
+  animation: blinkSoft .7s steps(1) infinite;
+}
+
+.loading { display: flex; flex-direction: column; align-items: center; gap: 2cqh; }
+.loading-label {
+  font-size: 3.8cqw;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-shadow: -.25cqw 0 rgba(255, 40, 130, .55), .25cqw 0 rgba(40, 220, 255, .45), 0 0 1.6cqw rgba(255, 220, 170, .7);
+}
+.loading-label .dots::after { content: ""; animation: dots 1.2s steps(1) infinite; }
+.bar {
+  width: 50cqw;
+  height: 3.4cqh;
+  padding: .6cqw;
+  border-radius: 99px;
+  background: rgba(25, 0, 60, .55);
+  box-shadow: inset 0 0 0 .45cqw rgba(255, 186, 90, .85), 0 0 2cqw rgba(255, 150, 40, .35);
+}
+.bar i {
+  display: block;
+  width: var(--p, 0%);
+  height: 100%;
+  border-radius: inherit;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 1.6cqw, rgba(120, 40, 0, .28) 1.6cqw 2cqw),
+    linear-gradient(180deg, #ffe39a 0 30%, #ffad3b 30% 70%, #f07a14 70%);
+  box-shadow: 0 0 1.6cqw rgba(255, 170, 60, .85);
+  transition: width .12s linear;
+}
+.pct { font-size: 2.6cqw; font-weight: 700; letter-spacing: .1em; color: #ffd9a0; }
+/* al llegar al 100%: el texto "¡Listo!" salta y la barra destella */
+.loading.done .loading-label { color: #ffe9b0; animation: donePop .45s cubic-bezier(.3, 1.8, .5, 1); }
+.loading.done .bar { animation: barFlash .5s ease-out; }
+.skip {
+  margin-top: -3cqh;
+  font-size: 1.9cqw;
+  letter-spacing: .2em;
+  color: rgba(251, 242, 255, .45);
+  animation: blinkSoft 1.6s steps(1) infinite;
+}
+/* con la carga al 100% aparece el aviso para continuar, estilo "PRESS START" */
+.crt-about.ready .skip {
+  display: flex;
+  align-items: center;
+  gap: 1.6cqw;
+  margin-top: -1.5cqh;
+  font-size: 2.7cqw;
+  font-weight: 700;
+  letter-spacing: .14em;
+  color: #fff4e3;
+  text-shadow: -.2cqw 0 rgba(255, 40, 130, .5), .2cqw 0 rgba(40, 220, 255, .4), 0 0 1.4cqw rgba(255, 220, 170, .7);
+  animation: crtPop .4s cubic-bezier(.3, 1.6, .5, 1) both;
+}
+.skip .go {
+  color: var(--orange);
+  font-size: .8em;
+  animation: nudge .5s steps(2) infinite, blinkSoft 1s steps(1) infinite;
+}
+body.about { cursor: pointer; }
+
+/* ráfaga de estática al cambiar de pantalla */
+.crt-static {
+  position: absolute; inset: 0;
+  opacity: 0;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='s'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='1' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 2.2 -.6'/></filter><rect width='100%' height='100%' filter='url(%23s)'/></svg>"),
+    #3a1a70;
+  pointer-events: none;
+}
+body.switching .crt-static { animation: static .55s steps(5) forwards; }
+.crt-static::after {             /* franja clara que baja, como al cambiar de canal */
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  top: -25%;
+  height: 22%;
+  background: linear-gradient(transparent, rgba(255, 255, 255, .3) 50%, transparent);
+}
+body.switching .crt-static::after { animation: roll .55s linear forwards; }
+
+/* malla de pixeles del fósforo: cada celda es un puntito, como en una pantalla vieja */
+.crt-dots {
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(255, 230, 255, .16) 0 30%, transparent 46%),
+    radial-gradient(circle, transparent 0 55%, rgba(18, 0, 45, .38) 72%);
+  background-size: .85cqw .85cqw;
+  pointer-events: none;
+}
+/* grano animado */
+.crt-grain {
+  position: absolute; inset: -50%;
+  opacity: .28;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 -.2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation: noise .22s steps(3) infinite;
+  pointer-events: none;
+}
+
+.crt-vignette {                  /* oscurece los bordes = curvatura del tubo */
+  position: absolute; inset: 0;
+  background: radial-gradient(120% 110% at 50% 46%, transparent 62%, rgba(20, 0, 50, .45) 86%, rgba(8, 0, 22, .85) 100%);
+  pointer-events: none;
+}
+
+/* reflejos reales de la foto encima del contenido */
+.glass {
+  mix-blend-mode: screen;
+  opacity: .3;
+  pointer-events: none;
+}
+.glare {
+  position: absolute; inset: 0;
+  background: radial-gradient(14% 12% at var(--gx, 52%) var(--gy, 30%), rgba(255, 255, 255, .14), transparent 70%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* =========================================================
+   CONTROL (primer plano, derecha)
+   ========================================================= */
+.pad-wrap {
+  position: absolute;
+  right: calc(var(--H) * -0.07);
+  bottom: calc(var(--H) * -0.09);
+  width: calc(var(--H) * .6);
+  transform: rotate(-6deg);
+  /* sombra para separarlo del fondo + un poco de la luz morada de la escena */
+  filter: drop-shadow(0 26px 30px rgba(0, 0, 0, .65)) drop-shadow(0 0 28px rgba(150, 80, 255, .25));
+  opacity: 0;
+  animation: padIn 1.2s 1.7s cubic-bezier(.2, .9, .25, 1) forwards;
+}
+.pad-img {                       /* foto del control con el fondo recortado (assets/control.png) */
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+}
+
+/* =========================================================
+   FOOTER + CTA
+   ========================================================= */
+.footer {
+  position: fixed;
+  inset: auto 0 0 0;
+  height: var(--ftr);
+  padding: 0 var(--gutter) 34px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  z-index: 30;
+  pointer-events: none;
+}
+.footer > * { pointer-events: auto; }
+
+.sound {                         /* mismo estilo que CONTÁCTAME, en redondo */
+  justify-self: start;
+  position: relative;
+  display: grid; place-items: center;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 3px solid #d8c2ff;
+  background:
+    var(--grain-light) 0 0 / 140px 140px,
+    var(--grain-violet) 0 0 / 160px 160px,
+    radial-gradient(circle at 50% 45%, #b58bff 0%, #9b66f7 36%, #8350ec 66%, #6634d6 100%);
+  box-shadow:
+    inset 0 0 8px rgba(45, 10, 115, .6),
+    0 0 10px rgba(190, 145, 255, .55),
+    0 0 20px rgba(140, 70, 255, .35);
+  opacity: 0;
+  animation: fadeIn .8s 2.4s forwards;
+  transition: filter .2s, scale .12s;
+}
+.sound:hover { filter: brightness(1.12); }
+.sound:active { scale: .92; }
+.sound .bars i { background: #fff; box-shadow: 0 0 4px rgba(255, 255, 255, .75); }
+.bars { display: flex; align-items: flex-end; gap: 2px; height: 12px; }
+.bars i { width: 2px; height: 100%; background: var(--ink); transform-origin: bottom; animation: eq 1s ease-in-out infinite; }
+.bars i:nth-child(2) { animation-delay: -.3s; }
+.bars i:nth-child(3) { animation-delay: -.6s; }
+.bars i:nth-child(4) { animation-delay: -.15s; }
+.sound[aria-pressed="false"] .bars i { animation: none; transform: scaleY(.2); }
+
+/* ---------- Botón CONTÁCTAME: estilo START en morado ----------
+   morado más claro al centro (luz) y más profundo en las orillas, grano suave,
+   borde lila con resplandor y texto blanco con contorno pixel morado oscuro */
+.cta {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  padding: 11px 34px;
+  border-radius: 999px;
+  border: 4px solid #d8c2ff;
+  font: 700 clamp(15px, 1.1vw, 17px) "Silkscreen", var(--f-pixel);
+  letter-spacing: .06em;
+  color: #fff;
+  /* contorno pixel morado oscuro + sombra dura: el blanco se lee sobre todo el morado */
+  text-shadow:
+    -2px 0 0 #3a1384, 2px 0 0 #3a1384, 0 -2px 0 #3a1384, 0 2px 0 #3a1384,
+    2px 3px 0 #24095a;
+  background:
+    var(--grain-light) 0 0 / 140px 140px,
+    var(--grain-violet) 0 0 / 160px 160px,
+    radial-gradient(70% 90% at 50% 50%, #b58bff 0%, #9b66f7 34%, #8350ec 64%, #6634d6 100%);
+  box-shadow:
+    inset 0 0 16px rgba(45, 10, 115, .6),          /* orillas interiores más profundas */
+    0 0 14px rgba(190, 145, 255, .6),              /* resplandor del borde lila */
+    0 0 34px rgba(140, 70, 255, .45);              /* resplandor morado */
+  opacity: 0;
+  animation: popIn .8s 2.5s cubic-bezier(.2, 1.3, .4, 1) forwards;
+  transition: filter .2s, box-shadow .25s, scale .12s;
+}
+.cta-hand {
+  position: absolute;
+  left: calc(100% + 30px);                         /* aire entre el botón y la mano */
+  top: 50%;
+  width: 40px;
+  height: auto;
+  translate: 0 -50%;
+  filter: url(#px-grain) drop-shadow(0 0 3px rgba(230, 205, 255, .8)) drop-shadow(0 0 12px rgba(160, 95, 255, .6));
+  animation: point .7s ease-in-out infinite;
+}
+/* mano en lilas, igual que la de MY PROJECTS */
+.cta-hand path:nth-of-type(1) { fill: #7d4fd6; }   /* contorno */
+.cta-hand path:nth-of-type(2) { fill: #dcc0ff; }   /* relleno */
+.cta-hand path:nth-of-type(3) { fill: #b48cf2; }   /* sombra de los dedos */
+.cta-hand path:nth-of-type(4) { fill: #c49bff; }   /* puño */
+
+.cta:hover, .cta:focus-visible {
+  outline: none;
+  filter: brightness(1.1);
+  box-shadow:
+    inset 0 0 12px rgba(45, 10, 115, .5),
+    0 0 20px rgba(200, 160, 255, .85),
+    0 0 46px rgba(140, 70, 255, .65);
+}
+.cta:hover .cta-hand { animation-duration: .35s; }
+.cta:active { scale: .96; }
+
+/* =========================================================
+   OVERLAYS
+   ========================================================= */
+
+.vignette {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background: radial-gradient(75% 75% at 50% 45%, transparent 55%, rgba(0, 0, 0, .7) 100%);
+  z-index: 20;
+}
+
+/* grano de película leve sobre toda la página (el mismo en proyectos.css) */
+.grain {
+  position: fixed;
+  inset: -50%;
+  z-index: 40;
+  pointer-events: none;
+  opacity: .2;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>") 0 0 / 220px 220px;
+  animation: filmGrain .5s steps(4) infinite;
+}
+@keyframes filmGrain {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-6%, 4%); }
+  50% { transform: translate(4%, -7%); }
+  75% { transform: translate(-3%, -4%); }
+}
+
+.power-on {                      /* pantalla negra inicial que se "abre" */
+  position: fixed; inset: 0;
+  background: #000;
+  z-index: 60;
+  pointer-events: none;
+  animation: open .6s .45s ease forwards;
+}
+.power-on::after {               /* línea de luz del encendido */
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  background: #fff;
+  box-shadow: 0 0 24px 4px #c9a4ff, 0 0 70px 14px rgba(150, 80, 255, .45);
+  transform: scaleX(0);
+  animation: line .75s .05s ease-out forwards;
+}
+
+/* =========================================================
+   TRANSICIONES ENTRE PANTALLAS
+   home → about     : la interfaz sale escalonada, la cámara se acerca,
+                      la portada se corta en franjas, estática y se enciende el texto
+   about → projects : TODA la pantalla se apaga como un CRT (destello → línea → punto),
+                      la cámara empuja hacia el punto y su luz llena la ventana
+   ========================================================= */
+body.about .tv-photo {
+  scale: 1.45;
+  translate: calc(-50% + 2vw) 4vh;                 /* pantalla centrada con aire arriba y abajo */
+  transition: scale 1.15s cubic-bezier(.76, 0, .24, 1), translate 1.15s cubic-bezier(.76, 0, .24, 1);
+}
+
+/* la interfaz sale escalonada: menú hacia arriba, botón y control hacia abajo */
+body.about .header,
+body.about .footer { pointer-events: none; }
+body.about .nav a { animation: liftOut .5s cubic-bezier(.55, 0, .75, .2) both; }
+body.about .nav a:nth-child(2) { animation-delay: .05s; }
+body.about .nav a:nth-child(3) { animation-delay: .1s; }
+body.about .nav a:nth-child(4) { animation-delay: .15s; }
+body.about .cta      { animation: sinkOut .5s .05s cubic-bezier(.55, 0, .75, .2) both; }
+body.about .sound    { animation: sinkOut .45s cubic-bezier(.55, 0, .75, .2) both; }
+body.about .pad-wrap { animation: padOut .8s cubic-bezier(.55, 0, .75, .2) both; }
+
+/* cambio de canal: la portada se corta en franjas y el texto se enciende */
+body.about .crt-content {
+  animation: glitchOut .45s steps(1) forwards;
+  visibility: hidden;
+  transition: visibility 0s .5s;
+}
+body.about .crt-about {
+  visibility: visible;
+  pointer-events: auto;
+  cursor: pointer;
+  animation: powerIn .5s .75s cubic-bezier(.2, .9, .25, 1) both;
+  transition: visibility 0s .7s;
+}
+
+/* al volver con Esc, la portada vuelve a entrar sin la espera inicial */
+.returning .nav a,
+.returning .cta,
+.returning .sound,
+.returning .pad-wrap { animation-delay: .35s !important; }
+
+/* apagado CRT de toda la pantalla (fondo + texto + barra) */
+body.shutdown .crt {
+  opacity: 1;
+  animation: crtOff .6s cubic-bezier(.7, 0, .3, 1) forwards;
+}
+body.shutdown .crt-flare { animation: flare .9s .15s cubic-bezier(.3, 0, .3, 1) forwards; }
+body.shutdown .tv-photo {                          /* la cámara empuja hacia el punto de luz */
+  scale: 2.8;
+  transition: scale 1s .3s cubic-bezier(.6, 0, .8, .3), translate 1s .3s cubic-bezier(.6, 0, .8, .3);
+}
+.crt-flare {
+  position: absolute;
+  left: 45.25%; top: 45.82%;                       /* centro del vidrio */
+  width: 9%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0 10%, rgba(240, 225, 255, .95) 18%, rgba(185, 130, 255, .55) 38%, transparent 68%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* la luz del punto florece hasta llenar la ventana (borde suave, no un disco duro).
+   proyectos.css usa el mismo degradado para que el primer cuadro calce con este */
+.warp {
+  position: fixed;
+  left: var(--cx, 50%); top: var(--cy, 50%);
+  width: 300vmax; height: 300vmax;
+  translate: -50% -50%;
+  z-index: 55;
+  background: radial-gradient(circle closest-side, #fff 0, #f2e6ff 2%, #c29bff 7%, #7a40e6 18%, #4a1a9e 34%, #2c0b6b 60%, #2c0b6b 80%, transparent 100%);
+  scale: 0;
+  pointer-events: none;
+}
+body.warping .warp {
+  scale: 1;
+  transition: scale .65s cubic-bezier(.7, 0, .3, 1);
+}
+
+/* =========================================================
+   KEYFRAMES
+   ========================================================= */
+@keyframes fadeIn { to { opacity: 1; } }
+@keyframes drift  { to { opacity: 1; translate: 0 0; } }
+@keyframes led    { 50% { opacity: .35; box-shadow: 0 0 4px 1px rgba(255, 122, 18, .4); } }
+@keyframes popIn  { from { opacity: 0; transform: translateY(20px) scale(.85); } to { opacity: 1; transform: none; } }
+@keyframes type   { from { opacity: 1; clip-path: inset(0 100% 0 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
+@keyframes drop   { to { opacity: 1; transform: none; } }
+@keyframes wave   { 50% { translate: 0 -7%; } }
+@keyframes nudge  { 50% { translate: -.6cqw 0; } }
+@keyframes point  { 50% { translate: -8px -50%; } }
+@keyframes dots   { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+@keyframes static { 0% { opacity: 1; background-position: 0 0, 0 0; } 60% { opacity: .85; } 100% { opacity: 0; background-position: 40px 220px, 0 0; } }
+@keyframes roll   { to { top: 110%; } }
+@keyframes crtPop { from { opacity: 0; scale: .6; filter: brightness(3); } to { opacity: 1; scale: 1; filter: none; } }
+@keyframes donePop  { 0% { transform: scale(.8); } 60% { transform: scale(1.18); } 100% { transform: none; } }
+@keyframes barFlash { 40% { filter: brightness(1.9); } }
+
+/* salidas de la interfaz */
+@keyframes liftOut { from { opacity: 1; translate: 0 0; filter: none; } to { opacity: 0; translate: 0 -26px; filter: blur(6px); } }
+@keyframes sinkOut { from { opacity: 1; transform: none; filter: none; } to { opacity: 0; transform: translateY(36px) scale(.92); filter: blur(6px); } }
+@keyframes padOut  { from { opacity: 1; translate: 0 0; } to { opacity: 0; translate: 28% 70%; } }
+
+/* la portada se corta en franjas (cambio de canal) */
+@keyframes glitchOut {
+  0%   { translate: 0 0;          filter: none;                            clip-path: inset(0 0 0 0);     opacity: 1; }
+  15%  { translate: 2.4cqw 0;     filter: hue-rotate(70deg) saturate(1.8); clip-path: inset(0 0 0 0); }
+  30%  { translate: -1.8cqw .6cqh;                                         clip-path: inset(18% 0 46% 0); }
+  45%  { translate: 1.2cqw 0;     filter: hue-rotate(-40deg) brightness(1.6); clip-path: inset(52% 0 12% 0); }
+  60%  { translate: -.6cqw 0;                                              clip-path: inset(36% 0 40% 0); opacity: .8; }
+  80%  { translate: 3cqw 0;                                                clip-path: inset(47% 0 47% 0); opacity: .6; }
+  100% { translate: 0 0;                                                   clip-path: inset(50% 0 50% 0); opacity: 0; }
+}
+/* el texto "sobre mí" se enciende desde una línea */
+@keyframes powerIn {
+  0%   { opacity: 0; transform: scale(1.05, .02); filter: brightness(4); }
+  45%  { opacity: 1; transform: scale(1, 1.04);   filter: brightness(1.8); }
+  100% { opacity: 1; transform: none;             filter: none; }
+}
+/* apagado CRT: destello → línea → punto */
+@keyframes crtOff {
+  0%   { transform: none;                filter: brightness(1); }
+  12%  { transform: scale(1.02, 1.04);   filter: brightness(1.7); }
+  45%  { transform: scale(1, .008);      filter: brightness(4); }
+  75%  { transform: scale(.04, .008);    filter: brightness(7); }
+  100% { transform: scale(0, 0);         filter: brightness(8); }
+}
+/* resplandor que acompaña: primero una línea ancha, luego un punto que late */
+@keyframes flare {
+  0%   { opacity: 0; scale: 3.2 .04; }
+  18%  { opacity: 1; scale: 3.2 .05; }
+  40%  { opacity: 1; scale: .32 .32; }
+  65%  { opacity: 1; scale: .6; }
+  85%  { opacity: 1; scale: .4; }
+  100% { opacity: 1; scale: .5; }
+}
+@keyframes glitch {              /* salto de señal cada cierto tiempo */
+  0%, 100% { translate: 0 0; filter: none; }
+  93% { translate: .8cqw 0; filter: hue-rotate(25deg); }
+  94% { translate: -.6cqw .3cqh; filter: none; }
+  95% { translate: 0 0; }
+}
+@keyframes blinkSoft { 0%, 100% { opacity: 1; } 50% { opacity: .2; } }
+@keyframes band   { from { background-position: 0 100%; } to { background-position: 0 -200%; } }
+@keyframes noise  { 0% { transform: translate(0, 0); } 33% { transform: translate(-8%, 4%); } 66% { transform: translate(4%, -8%); } }
+@keyframes flicker {
+  0%, 95%, 100% { filter: brightness(1); }
+  96% { filter: brightness(1.35) hue-rotate(-10deg); }
+  97% { filter: brightness(.8); }
+  98% { filter: brightness(1.15); }
+}
+@keyframes crtOn {
+  0%   { opacity: 1; transform: scale(1, .004); filter: brightness(4); }
+  35%  { opacity: 1; transform: scale(1, .004); filter: brightness(4); }
+  70%  { opacity: 1; transform: scale(1, 1.06); filter: brightness(1.8); }
+  100% { opacity: 1; transform: none; filter: brightness(1); }
+}
+@keyframes padIn  { from { opacity: 0; translate: 12% 25%; } to { opacity: 1; translate: 0 0; } }
+@keyframes eq     { 50% { transform: scaleY(.3); } }
+@keyframes open   { to { opacity: 0; } }
+@keyframes close  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dollyIn {             /* la cámara se acerca a la TV al cargar */
+  from { opacity: 0; scale: 1.18; filter: blur(14px) brightness(.4); }
+  to   { opacity: 1; scale: 1;    filter: none; }
+}
+@keyframes line   { 0% { transform: scaleX(0); opacity: 1; } 45% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(1); opacity: 0; } }
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 900px) {
+  .nav a { font-size: 13px; letter-spacing: .08em; }
+}
+
+/* solo celulares / ventanas verticales */
+@media (max-width: 600px), (max-width: 900px) and (orientation: portrait) {
+  :root {
+    --hdr: 110px;
+    --ftr: 140px;
+    --H: calc(88vw / .53 / 1.7905);   /* la TV ocupa ~88% del ancho */
+  }
+  .header { height: auto; padding-top: 28px; }
+  .nav { display: grid; grid-template-columns: 1fr 1fr; row-gap: 12px; column-gap: 16px; }
+  .nav a:nth-child(even) { text-align: right; }
+  .tv-photo { top: calc(50vh - var(--H) * .5); }
+  .footer { grid-template-columns: 1fr; justify-items: center; }
+  .sound { display: none; }
+  .pad-wrap { width: 50vw; right: -12vw; bottom: 14vh; }   /* en el espacio libre entre la TV y el botón */
+  .cta { padding: 10px 24px; }
+  .cta-hand { width: 32px; left: calc(100% + 20px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01s !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+  }
+}

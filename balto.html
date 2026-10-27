@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Balto · App design — Andres Claros</title>
+  <meta name="description" content="Balto: diseño de app móvil para llevar la salud y el día a día de tu mascota en un solo lugar." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Doto:wght@800;900&family=Press+Start+2P&family=Silkscreen:wght@700&family=Space+Grotesk:wght@400;500;600&family=Urbanist:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="proyecto.css" />
+  <link rel="stylesheet" href="contacto-boton.css" />
+  <style>
+    /* ---------- BALTO ---------- */
+    .p-balto { --urb: "Urbanist", system-ui, sans-serif; }
+
+    /* hero: teléfono con el cartucho detrás */
+    .hero-app { position: relative; display: grid; place-items: center; }
+    .hero-app .telefono { width: min(100%, 290px); z-index: 1; }
+    .hero-app .cartucho { position: absolute; width: 52%; left: -26%; top: 6%; rotate: -12deg; z-index: 0; }
+    .hero-app .burbuja {
+      position: absolute; z-index: 2;
+      left: -18%; bottom: 16%;
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px 12px 12px;
+      border-radius: 16px;
+      font: 600 14px var(--urb);
+      color: #262626;
+      background: #fff;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, .35);
+      animation: flotar 4s ease-in-out infinite;
+    }
+    .burbuja b { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: #2E5955; color: #fff; font-size: 16px; }
+    .burbuja small { display: block; font: 400 12px var(--urb); color: #77737F; }
+    .p-balto .hero h1 { letter-spacing: .06em; }
+
+    /* problema */
+    .lema { font: 800 clamp(34px, 4.6vw, 64px) / 1 var(--urb); letter-spacing: -.02em; margin: 14px 0 0; }
+    .lema span { color: var(--acc); }
+
+    /* investigación: duelo de paletas */
+    .duelo { display: grid; grid-template-columns: 1fr auto 1fr; gap: 18px; align-items: center; margin-bottom: clamp(40px, 6vh, 70px); }
+    .opcion { position: relative; padding: 18px; border-radius: 16px; background: rgba(255, 255, 255, .03); box-shadow: inset 0 0 0 1px var(--line); }
+    .opcion .tiras { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px; }
+    .opcion .tiras i { aspect-ratio: 1; border-radius: 8px; background: var(--c); }
+    .opcion.perdio { opacity: .45; filter: grayscale(.3); }
+    .opcion.perdio::after { content: ""; position: absolute; inset: 18px; background: linear-gradient(to top right, transparent calc(50% - 1.5px), #ff5a64 calc(50% - 1.5px) calc(50% + 1.5px), transparent calc(50% + 1.5px)); }
+    .opcion.gano { box-shadow: inset 0 0 0 2px var(--acc), 0 0 40px var(--acc-glow); }
+    .sello {
+      position: absolute; top: -14px; right: 14px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font: 400 9px var(--f-pixel);
+      color: #12241f;
+      background: var(--acc);
+      rotate: 4deg;
+    }
+    .vs { font: 400 22px var(--f-pixel); color: var(--dim); }
+    .refs { align-items: start; }
+    .refs .shot { aspect-ratio: 4 / 5; background: #f4f4f4; }
+    .refs .shot img { object-fit: cover; object-position: top; }
+    .refs h3 { font: 700 16px var(--f-title); letter-spacing: .06em; margin: 16px 0 6px; }
+    .refs p { font-size: 15px; line-height: 1.5; color: var(--txt); }
+
+    /* arquitectura: diagrama en abanico + teléfono */
+    .arquitectura { display: grid; grid-template-columns: 1.55fr 1fr; gap: clamp(20px, 4vw, 60px); align-items: center; }
+    .flujo { display: grid; grid-template-columns: repeat(3, minmax(0, .9fr)) minmax(0, 1.25fr); grid-template-rows: repeat(7, auto); gap: 10px clamp(22px, 3vw, 44px); align-items: center; }
+    .flujo .nodo { cursor: pointer; padding: 10px 12px; font-size: 12px; }
+    .flujo .f1 { grid-column: 1; grid-row: 1 / -1; }
+    .flujo .f2 { grid-column: 2; grid-row: 1 / -1; }
+    .flujo .f3 { grid-column: 3; grid-row: 1 / -1; }
+    .flujo .hijo { grid-column: 4; text-align: left; }
+    .flujo .nodo.activo { background: var(--acc-2); }
+    .tel-lado { display: grid; justify-items: center; gap: 16px; position: sticky; top: 90px; }
+    .tel-nombre { font: 400 10px var(--f-pixel); color: var(--acc); text-align: center; min-height: 1em; }
+
+    /* pantallas */
+    .pantallas .item { flex: 0 0 auto; width: clamp(200px, 19vw, 250px); display: grid; gap: 14px; transition: translate .4s cubic-bezier(.2, .9, .25, 1); }
+    .pantallas .item:hover { translate: 0 -10px; }
+    .pantallas .telefono { width: 100%; border-radius: 34px; padding: 8px; cursor: zoom-in; }
+    .pantallas .telefono img { border-radius: 27px; }
+    .pantallas .telefono:hover img { transform: none; }
+    .pantallas .telefono::before { top: 14px; height: 16px; }
+    .pantallas h3 { font: 700 15px var(--f-title); letter-spacing: .05em; }
+    .pantallas h3 b { color: var(--acc); font-weight: 700; margin-right: 6px; }
+    .pantallas p { font-size: 14px; line-height: 1.45; color: var(--txt); }
+
+    /* sistema: paleta exacta */
+    .paleta-b { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 10px; }
+    .paleta-b.sem { grid-template-columns: repeat(9, minmax(0, 1fr)); margin-top: 22px; }
+    .sw { display: grid; gap: 8px; text-align: left; cursor: copy; }
+    .sw i { aspect-ratio: 1; border-radius: 14px; background: var(--c); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1); transition: translate .3s cubic-bezier(.2, .9, .25, 1), box-shadow .3s; }
+    .sw:hover i { translate: 0 -6px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), 0 14px 30px rgba(0, 0, 0, .4); }
+    .sw strong { font: 600 13px var(--urb); color: var(--ink); }
+    .sw small { font: 800 11px var(--f-ui); letter-spacing: .08em; color: var(--dim); }
+    .sw.copiado small::after { content: " ✓"; color: var(--acc); }
+    .tipo-b { display: grid; grid-template-columns: auto 1fr; gap: clamp(20px, 4vw, 50px); align-items: center; margin: clamp(40px, 6vh, 60px) 0; padding: clamp(22px, 3vw, 36px); border-radius: 18px; background: #F9F9F9; color: #262626; }
+    .tipo-b .aa { font: 800 clamp(80px, 10vw, 140px) / .8 var(--urb); color: #2E5955; }
+    .tipo-b p { font-family: var(--urb); }
+    .tipo-b .t1 { font-weight: 800; font-size: clamp(24px, 2.6vw, 34px); }
+    .tipo-b .t2 { font-weight: 600; font-size: 18px; margin: 6px 0; }
+    .tipo-b .t3 { font-weight: 400; font-size: 15px; color: #77737F; }
+    .tipo-b .pie { color: #77737F; margin-top: 14px; }
+
+    /* kit de UI con filtros */
+    .kit { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+    .kit .shot { height: 210px; background: #F9F9F9; box-shadow: 0 0 0 1px rgba(255, 255, 255, .06); }
+    .kit .shot img { object-fit: contain; padding: 20px 18px 44px; }
+    .kit .shot:hover img { transform: scale(1.06); }
+    .kit figcaption { position: absolute; left: 14px; bottom: 12px; margin: 0; color: #77737F; }
+    .kit figcaption b { color: #2E5955; }
+
+    /* marca */
+    .marca-b { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .logo-card { position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 1; display: grid; place-items: center; background: #2E5955; box-shadow: 0 0 0 1px var(--line); transition: translate .4s cubic-bezier(.2, .9, .25, 1), box-shadow .4s; }
+    .logo-card:hover { translate: 0 -8px; box-shadow: 0 0 0 1px var(--acc), 0 24px 50px rgba(0, 0, 0, .4), 0 0 40px var(--acc-glow); }
+    .logo-card img { width: 76%; height: 76%; object-fit: contain; }
+    .logo-card.claro { background: #F9F9F9; }
+    .logo-card figcaption { position: absolute; left: 16px; bottom: 12px; margin: 0; color: rgba(255, 255, 255, .7); }
+    .logo-card.claro figcaption { color: #77737F; }
+    .isotipo-anim img { animation: latido 3s ease-in-out infinite; }
+
+    @keyframes latido { 0%, 100% { scale: 1; } 10% { scale: 1.06; } 20% { scale: 1; } 30% { scale: 1.04; } 40% { scale: 1; } }
+
+    @media (max-width: 900px) {
+      .hero-app .burbuja { left: 0; }
+      .duelo { grid-template-columns: 1fr; }
+      .arquitectura { grid-template-columns: 1fr; }
+      .tel-lado { position: static; }
+      .flujo { grid-template-columns: 1fr 1fr; grid-template-rows: none; }
+      .flujo .f1, .flujo .f2, .flujo .f3, .flujo .hijo { grid-column: auto; grid-row: auto; }
+      .flujo svg.lineas { display: none; }
+      .paleta-b, .paleta-b.sem { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .tipo-b { grid-template-columns: 1fr; }
+      .marca-b { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="p-balto cargando">
+
+  <div class="boot" aria-hidden="true">
+    <div class="boot-inner">
+      <p class="boot-label">INSERTANDO CARTUCHO 04</p>
+      <p class="boot-name grano">BALTO</p>
+      <div class="boot-bar"><i></i></div>
+      <p class="boot-label">CLIC PARA SALTAR</p>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <a class="back" href="proyectos.html#app-design" data-salir><span>◀</span> PROYECTOS</a>
+    <div class="xp">EXP <div class="xp-bar"><i></i></div></div>
+    <p class="topbar-tag">APP DESIGN · 04/04</p>
+  </header>
+  <nav class="niveles" aria-label="Secciones"></nav>
+
+  <main class="pagina">
+
+    <!-- ================= HERO ================= -->
+    <section class="hero" id="inicio" data-nivel="INICIO">
+      <div class="hero-fondo" style="--fondo:url(assets/proyectos/balto/cover.png)"></div>
+      <div>
+        <p class="chip rv"><b></b> APP DESIGN · UX / UI</p>
+        <h1 class="grano rv" style="--d:.08s">BALTO</h1>
+        <p class="hero-tagline rv" style="--d:.16s">Todo lo que necesita tu mascota.</p>
+        <p class="lead rv" style="--d:.24s">Una app para llevar la salud y el día a día de tu mascota en un solo lugar: <strong>historial, vacunas, medicamentos, alertas</strong> y proveedores cercanos, sin papeles.</p>
+        <dl class="ficha rv" style="--d:.32s">
+          <div><dt>PLATAFORMA</dt><dd>App móvil</dd></div>
+          <div><dt>MI ROL</dt><dd>UX / UI + identidad</dd></div>
+          <div><dt>PANTALLAS CLAVE</dt><dd>10 flujos principales</dd></div>
+          <div><dt>SISTEMA</dt><dd>21 componentes + paleta</dd></div>
+        </dl>
+        <a class="empezar rv" style="--d:.4s" href="#problema">EMPEZAR NIVEL 1 <span>▼</span></a>
+      </div>
+      <div class="hero-cart rv" style="--d:.2s">
+        <div class="hero-app flota">
+          <span class="cartucho"><span><img src="assets/cartuchos/app-design.jpg" alt="Cartucho de Balto" /></span></span>
+          <div class="telefono"><img id="telHero" src="assets/proyectos/balto/pantallas/bienvenida.jpg" alt="Pantallas de la app Balto" /></div>
+          <div class="burbuja"><b>✓</b><div>Hora de la dosis de Luna<small>Amoxicilina 250 mg</small></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= NIVEL 1: EL PROBLEMA ================= -->
+    <section class="sec" id="problema" data-nivel="PROBLEMA">
+      <div class="sec-head">
+        <p class="nivel rv">NIVEL 1 · EL PROBLEMA</p>
+        <h2 class="rv" style="--d:.06s">Cuidar una mascota es <span class="acento">mucha información suelta</span>.</h2>
+        <p class="lead rv" style="--d:.12s">El carnet de vacunas en un cajón, la fórmula en una foto, la cita en la cabeza. Balto junta todo eso en un historial digital que crece con tu mascota.</p>
+      </div>
+      <div class="tres-col">
+        <article class="card rv"><span class="card-num">01 / PAPELES</span><h3>Todo se pierde</h3><p class="txt">Carnet, exámenes y fórmulas viven en papeles y fotos difíciles de encontrar cuando más se necesitan.</p></article>
+        <article class="card rv" style="--d:.08s"><span class="card-num">02 / FECHAS</span><h3>Todo se olvida</h3><p class="txt">Refuerzos, desparasitaciones y dosis diarias dependen de la memoria del dueño.</p></article>
+        <article class="card rv" style="--d:.16s"><span class="card-num">03 / SERVICIOS</span><h3>Todo está separado</h3><p class="txt">Veterinaria, peluquería, guardería y tienda, cada una en un lugar distinto.</p></article>
+      </div>
+      <p class="lema rv" style="margin-top:clamp(40px,7vh,80px)">Más cuidado, <span>menos vueltas.</span></p>
+    </section>
+
+    <!-- ================= NIVEL 2: INVESTIGACIÓN ================= -->
+    <section class="sec" id="investigacion" data-nivel="REFERENCIAS">
+      <div class="sec-head">
+        <p class="nivel rv">NIVEL 2 · REFERENCIAS</p>
+        <h2 class="rv" style="--d:.06s">Elegir con <span class="acento">intención</span>.</h2>
+        <p class="lead rv" style="--d:.12s">Cada referencia se guardó con una nota de qué tomar de ella. La primera decisión fue el color: dos paletas compitieron y ganó la que transmitía calma y salud.</p>
+      </div>
+
+      <div class="duelo">
+        <div class="opcion gano rv">
+          <span class="sello">ELEGIDA</span>
+          <div class="tiras"><i style="--c:#2E5955"></i><i style="--c:#2F5F5F"></i><i style="--c:#C7D0D5"></i><i style="--c:#F2F2F2"></i></div>
+          <p class="pie"><b>VERDE</b> · calma, salud, confianza</p>
+        </div>
+        <span class="vs rv">VS</span>
+        <div class="opcion perdio rv" style="--d:.1s">
+          <div class="tiras"><i style="--c:#4E3A91"></i><i style="--c:#A897EE"></i><i style="--c:#C9C1F4"></i><i style="--c:#E6E3FA"></i></div>
+          <p class="pie"><b>MORADO</b> · más juguetón, menos clínico</p>
+        </div>
+      </div>
+
+      <div class="tres-col refs">
+        <figure class="rv">
+          <div class="shot" data-grupo="refs"><img src="assets/proyectos/balto/referencias-1.png" alt="Primera toma de referencias: paletas y apps de mascotas" loading="lazy" /></div>
+          <h3>Primera toma</h3><p>Dos paletas candidatas y un mapa de apps de mascotas, adopción y tiendas.</p>
+        </figure>
+        <figure class="rv" style="--d:.08s">
+          <div class="shot" data-grupo="refs"><img src="assets/proyectos/balto/referencias-2.png" alt="Referencias de tipografía, splash animado y marketplace" loading="lazy" /></div>
+          <h3>Tipo, splash y tienda</h3><p>Tarjetas con la familia Urbanist, un splash animado con el logo y plantillas de marketplace.</p>
+        </figure>
+        <figure class="rv" style="--d:.16s">
+          <div class="shot" data-grupo="refs"><img src="assets/proyectos/balto/referencias-3.png" alt="Referencias de agendamiento, perfil y verificación" loading="lazy" /></div>
+          <h3>Flujos clave</h3><p>Agendar y buscar veterinarias, el perfil de la mascota y la verificación en dos pasos.</p>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ================= NIVEL 3: ARQUITECTURA ================= -->
+    <section class="sec" id="arquitectura" data-nivel="FLUJO">
+      <div class="sec-head">
+        <p class="nivel rv">NIVEL 3 · ARQUITECTURA</p>
+        <h2 class="rv" style="--d:.06s">Un inicio, <span class="acento">siete caminos</span>.</h2>
+        <p class="lead rv" style="--d:.12s">Después de entrar, todo sale de una vista rápida de la mascota. Pasa el mouse por cada pantalla del mapa para verla en el teléfono.</p>
+      </div>
+      <div class="arquitectura">
+        <div class="flujo diagrama" data-orient="h" data-preview="#telFlujo" data-preview-label="#telNombre"
+             data-lineas="fl1>fl2, fl2>fl3, fl3>h1, fl3>h2, fl3>h3, fl3>h4, fl3>h5, fl3>h6, fl3>h7">
+          <button class="nodo f1" id="fl1" data-pantalla="assets/proyectos/balto/pantallas/bienvenida.jpg" data-nombre="BIENVENIDA">Bienvenida<small>ONBOARDING</small></button>
+          <button class="nodo f2" id="fl2" data-pantalla="assets/proyectos/balto/pantallas/inicio-sesion.jpg" data-nombre="INICIO DE SESION">Iniciar sesión<small>CUENTA</small></button>
+          <button class="nodo raiz f3 activo" id="fl3" data-pantalla="assets/proyectos/balto/pantallas/inicio.jpg" data-nombre="VISTA RAPIDA">Vista rápida<small>INICIO</small></button>
+          <button class="nodo hijo" id="h1" data-pantalla="assets/proyectos/balto/pantallas/linea-tiempo.jpg" data-nombre="LINEA DE TIEMPO">Línea de tiempo<small>HISTORIAL</small></button>
+          <button class="nodo hijo" id="h2" data-pantalla="assets/proyectos/balto/pantallas/registrar-evento.jpg" data-nombre="REGISTRAR EVENTO">Registrar evento<small>BOTÓN +</small></button>
+          <button class="nodo hijo" id="h3" data-pantalla="assets/proyectos/balto/pantallas/panel-salud.jpg" data-nombre="PANEL DE SALUD">Panel de salud<small>VACUNAS · PESO</small></button>
+          <button class="nodo hijo" id="h4" data-pantalla="assets/proyectos/balto/pantallas/medicamentos.jpg" data-nombre="MEDICAMENTOS">Medicamentos<small>TOMAS DE HOY</small></button>
+          <button class="nodo hijo" id="h5" data-pantalla="assets/proyectos/balto/pantallas/alertas.jpg" data-nombre="ALERTAS">Centro de alertas<small>RECORDATORIOS</small></button>
+          <button class="nodo hijo" id="h6" data-pantalla="assets/proyectos/balto/pantallas/proveedores.jpg" data-nombre="PROVEEDORES">Proveedores<small>CERCA DE TI</small></button>
+          <button class="nodo hijo" id="h7" data-pantalla="assets/proyectos/balto/pantallas/tienda.jpg" data-nombre="TIENDA">Tienda<small>RECOMENDADOS</small></button>
+        </div>
+        <div class="tel-lado rv" style="--d:.1s">
+          <div class="telefono"><img id="telFlujo" src="assets/proyectos/balto/pantallas/inicio.jpg" alt="Pantalla seleccionada en el mapa de flujo" /></div>
+          <p class="tel-nombre" id="telNombre">VISTA RAPIDA</p>
+        </div>
+      </div>
+      <figure class="rv" style="margin-top:clamp(40px,6vh,70px)">
+        <div class="shot" data-grupo="flujo" style="aspect-ratio:16/7;background:#f2f2f2"><img src="assets/proyectos/balto/flujo.png" alt="Mapa de flujo completo de la app con todas sus rutas" loading="lazy" style="object-fit:contain" /></div>
+        <figcaption><b>MAPA COMPLETO</b> · Todas las rutas: carga inicial, registro, salud, búsqueda, medicamentos, ajustes y alertas</figcaption>
+      </figure>
+    </section>
+
+    <!-- ================= NIVEL 4: PANTALLAS ================= -->
+    <section class="sec" id="pantallas" data-nivel="PANTALLAS">
+      <div class="sec-head">
+        <p class="nivel rv">NIVEL 4 · PANTALLAS</p>
+        <h2 class="rv" style="--d:.06s">Diez pantallas, <span class="acento">una mascota</span>: Luna.</h2>
+        <p class="lead rv" style="--d:.12s">Todo el diseño se probó con un caso real: Luna, una golden de tres años, con su vacunación, un tratamiento activo y su veterinaria de siempre.</p>
+      </div>
+      <p class="arrastra-pista rv">ARRASTRA PARA VER MÁS <span>▶</span></p>
+      <div class="pantallas rv" data-arrastre>
+        <div class="item"><figure class="telefono shot" data-grupo="pantallas"><img src="assets/proyectos/balto/pantallas/bienvenida.jpg" alt="Bienvenida" loading="lazy" /><figcaption hidden>Bienvenida</figcaption></figure><h3><b>01</b>Bienvenida</h3><p>«Su historia, sin papeles»: la promesa de la app en la primera pantalla.</p></div>
+        <div class="item"><figure class="telefono shot" data-grupo="pantallas"><img src="assets/proyectos/balto/pantallas/inicio-sesion.jpg" alt="Inicio de sesión" loading="lazy" /><figcaption hidden>Inicio de sesión</figcaption></figure><h3><b>02</b>Iniciar sesión</h3><p>Correo y contraseña, con el logo como protagonista.</p></div>
+        <div class="item"><figure class="telefono shot" data-grupo="pantallas"><img src="assets/proyectos/balto/pantallas/inicio.jpg" alt="Vista rápida" loading="lazy" /><figcaption hidden>Vista rápida</figcaption></figure><h3><b>03</b>Vista rápida</h3><p>La ficha de Luna: alergias, medicación vigente y últimas vacunas.</p></div>
+        <div class="item"><figure class="telefono shot" data-grupo="pantallas"><img src="assets/proyectos/balto/pantallas/linea-tiempo.jpg" alt="Línea de tiempo" loading="lazy" /><figcaption hidden>Línea de tiempo</figcaption></figure><h3><b>04</b>Línea de tiempo</h3><p>Todo el historial por mes, con filtros por vacunas o consultas.</p></div>
+        <div class="item"><figure class="telefono shot" data-grupo="pantallas"><img src="assets/proyectos/balto/pantallas/registrar-evento.jpg" alt="Registrar evento" loading="lazy" /><figcaption hidden>Registrar evento</figcaption></figure><h3><b>05</b>Registrar evento</h3><p>Vacuna, desparasitación, consulta o peso en un par de toques.</p></div>
+        <div class="item"><figure class="telefono shot" data-grupo="pantallas"><img src="assets/proyectos/balto/pantallas/panel-salud.jpg" alt="Panel de salud" loading="lazy" /><figcaption hidden>Panel de salud</figcaption></figure><h3><b>06</b>Panel de salud</h3><p>Estado al día, próximas vacunas y evolución del peso.</p></div>
+        <div class="item"><figure class="telefono shot" data-grupo="pantallas"><img src="assets/proyectos/balto/pantallas/medicamentos.jpg" alt="Medicamentos" loading="lazy" /><figcaption hidden>Medicamentos</figcaption></figure><h3><b>07</b>Medicamentos</h3><p>Tratamientos vigentes y las tomas de hoy, listas para confirmar.</p></div>
+        <div class="item"><figure class="telefono shot" data-grupo="pantallas"><img src="assets/proyectos/balto/pantallas/alertas.jpg" alt="Centro de alertas" loading="lazy" /><figcaption hidden>Centro de alertas</figcaption></figure><h3><b>08</b>Alertas</h3><p>Refuerzos y recordatorios de la semana, con «ya lo resolví».</p></div>
+        <div class="item"><figure class="telefono shot" data-grupo="pantallas"><img src="assets/proyectos/balto/pantallas/proveedores.jpg" alt="Proveedores" loading="lazy" /><figcaption hidden>Proveedores</figcaption></figure><h3><b>09</b>Proveedores</h3><p>Veterinarias, estéticas y guarderías cercanas, con filtros.</p></div>
+        <div class="item"><figure class="telefono shot" data-grupo="pantallas"><img src="assets/proyectos/balto/pantallas/tienda.jpg" alt="Tienda" loading="lazy" /><figcaption hidden>Tienda</figcaption></figure><h3><b>10</b>Tienda</h3><p>Alimentos y productos recomendados para Luna.</p></div>
+      </div>
+    </section>
+
+    <!-- ================= NIVEL 5: SISTEMA ================= -->
+    <section class="sec" id="sistema" data-nivel="SISTEMA">
+      <div class="sec-head">
+        <p class="nivel rv">NIVEL 5 · SISTEMA DE DISEÑO</p>
+        <h2 class="rv" style="--d:.06s">Piezas que <span class="acento">se repiten</span>, decisiones que no.</h2>
+        <p class="lead rv" style="--d:.12s">Un sistema pequeño y consistente: verde para la marca, neutros para la información y solo dos colores semánticos. Clic en un color para copiarlo.</p>
+      </div>
+
+      <p class="pie rv" style="margin-bottom:12px"><b>MARCA Y NEUTROS</b></p>
+      <div class="paleta-b">
+        <button class="sw rv" data-hex="#2E5955"><i style="--c:#2E5955"></i><strong>primario/900</strong><small>#2E5955</small></button>
+        <button class="sw rv" data-hex="#2F5F5F" style="--d:.03s"><i style="--c:#2F5F5F"></i><strong>primario/800</strong><small>#2F5F5F</small></button>
+        <button class="sw rv" data-hex="#C7D0D5" style="--d:.06s"><i style="--c:#C7D0D5"></i><strong>acento/300</strong><small>#C7D0D5</small></button>
+        <button class="sw rv" data-hex="#DCE2E5" style="--d:.09s"><i style="--c:#DCE2E5"></i><strong>acento/100</strong><small>#DCE2E5</small></button>
+        <button class="sw rv" data-hex="#262626" style="--d:.12s"><i style="--c:#262626"></i><strong>neutro/900</strong><small>#262626</small></button>
+        <button class="sw rv" data-hex="#77737F" style="--d:.15s"><i style="--c:#77737F"></i><strong>neutro/500</strong><small>#77737F</small></button>
+        <button class="sw rv" data-hex="#F2F2F2" style="--d:.18s"><i style="--c:#F2F2F2"></i><strong>neutro/50</strong><small>#F2F2F2</small></button>
+        <button class="sw rv" data-hex="#F9F9F9" style="--d:.21s"><i style="--c:#F9F9F9"></i><strong>fondo</strong><small>#F9F9F9</small></button>
+        <button class="sw rv" data-hex="#FFFFFF" style="--d:.24s"><i style="--c:#FFFFFF"></i><strong>neutro/0</strong><small>#FFFFFF</small></button>
+      </div>
+      <p class="pie rv" style="margin:26px 0 12px"><b>SEMÁNTICOS</b></p>
+      <div class="paleta-b">
+        <button class="sw rv" data-hex="#2E8B57"><i style="--c:#2E8B57"></i><strong>éxito</strong><small>#2E8B57</small></button>
+        <button class="sw rv" data-hex="#DFF3E6" style="--d:.03s"><i style="--c:#DFF3E6"></i><strong>éxito-suave</strong><small>#DFF3E6</small></button>
+        <button class="sw rv" data-hex="#C8475B" style="--d:.06s"><i style="--c:#C8475B"></i><strong>error</strong><small>#C8475B</small></button>
+        <button class="sw rv" data-hex="#FBE3E7" style="--d:.09s"><i style="--c:#FBE3E7"></i><strong>error-suave</strong><small>#FBE3E7</small></button>
+      </div>
+
+      <div class="tipo-b rv">
+        <span class="aa">Aa</span>
+        <div>
+          <p class="t1">Luna · Golden · 3 años</p>
+          <p class="t2">Hora de la dosis de Luna</p>
+          <p class="t3">Amoxicilina 250 mg · 1 cápsula (20:00)</p>
+          <p class="pie"><b>URBANIST</b> · REFERENCIA TIPOGRÁFICA · 800 / 600 / 400</p>
+        </div>
+      </div>
+
+      <div data-filtros>
+        <div class="filtros-btns rv">
+          <button class="btn-px activo" data-f="todos">TODOS</button>
+          <button class="btn-px" data-f="basicos">BÁSICOS</button>
+          <button class="btn-px" data-f="formularios">FORMULARIOS</button>
+          <button class="btn-px" data-f="navegacion">NAVEGACIÓN</button>
+          <button class="btn-px" data-f="tarjetas">TARJETAS</button>
+          <button class="btn-px" data-f="avisos">AVISOS</button>
+        </div>
+        <div class="kit">
+          <figure class="shot rv" data-cat="basicos" data-grupo="kit"><img src="assets/proyectos/balto/kit/boton.png" alt="Botones" loading="lazy" /><figcaption><b>BÁSICOS</b> · Botón</figcaption></figure>
+          <figure class="shot rv" data-cat="basicos" data-grupo="kit"><img src="assets/proyectos/balto/kit/chip.png" alt="Chips" loading="lazy" /><figcaption><b>BÁSICOS</b> · Chip</figcaption></figure>
+          <figure class="shot rv" data-cat="basicos" data-grupo="kit"><img src="assets/proyectos/balto/kit/interruptor.png" alt="Interruptor" loading="lazy" /><figcaption><b>BÁSICOS</b> · Interruptor</figcaption></figure>
+          <figure class="shot rv" data-cat="basicos" data-grupo="kit"><img src="assets/proyectos/balto/kit/etiqueta-estado.png" alt="Etiquetas de estado" loading="lazy" /><figcaption><b>BÁSICOS</b> · Etiqueta de estado</figcaption></figure>
+          <figure class="shot rv" data-cat="formularios" data-grupo="kit"><img src="assets/proyectos/balto/kit/calendario.png" alt="Calendario" loading="lazy" /><figcaption><b>FORMULARIOS</b> · Calendario</figcaption></figure>
+          <figure class="shot rv" data-cat="formularios" data-grupo="kit"><img src="assets/proyectos/balto/kit/busqueda.png" alt="Búsqueda" loading="lazy" /><figcaption><b>FORMULARIOS</b> · Búsqueda</figcaption></figure>
+          <figure class="shot rv" data-cat="formularios" data-grupo="kit"><img src="assets/proyectos/balto/kit/codigo.png" alt="Código de verificación" loading="lazy" /><figcaption><b>FORMULARIOS</b> · Código de verificación</figcaption></figure>
+          <figure class="shot rv" data-cat="formularios" data-grupo="kit"><img src="assets/proyectos/balto/kit/cantidad.png" alt="Control de cantidad" loading="lazy" /><figcaption><b>FORMULARIOS</b> · Cantidad</figcaption></figure>
+          <figure class="shot rv" data-cat="navegacion" data-grupo="kit"><img src="assets/proyectos/balto/kit/navegacion.png" alt="Navegación inferior" loading="lazy" /><figcaption><b>NAVEGACIÓN</b> · Barra inferior</figcaption></figure>
+          <figure class="shot rv" data-cat="navegacion" data-grupo="kit"><img src="assets/proyectos/balto/kit/hoja-inferior.png" alt="Hoja inferior" loading="lazy" /><figcaption><b>NAVEGACIÓN</b> · Hoja inferior</figcaption></figure>
+          <figure class="shot rv" data-cat="navegacion" data-grupo="kit"><img src="assets/proyectos/balto/kit/selector-mascota.png" alt="Selector de mascota" loading="lazy" /><figcaption><b>NAVEGACIÓN</b> · Selector de mascota</figcaption></figure>
+          <figure class="shot rv" data-cat="tarjetas" data-grupo="kit"><img src="assets/proyectos/balto/kit/ficha-mascota.png" alt="Ficha de mascota" loading="lazy" /><figcaption><b>TARJETAS</b> · Ficha de mascota</figcaption></figure>
+          <figure class="shot rv" data-cat="tarjetas" data-grupo="kit"><img src="assets/proyectos/balto/kit/cedula.png" alt="Cédula animal" loading="lazy" /><figcaption><b>TARJETAS</b> · Cédula animal</figcaption></figure>
+          <figure class="shot rv" data-cat="tarjetas" data-grupo="kit"><img src="assets/proyectos/balto/kit/tratamiento.png" alt="Tarjeta de tratamiento" loading="lazy" /><figcaption><b>TARJETAS</b> · Tratamiento</figcaption></figure>
+          <figure class="shot rv" data-cat="tarjetas" data-grupo="kit"><img src="assets/proyectos/balto/kit/plan.png" alt="Tarjeta de plan" loading="lazy" /><figcaption><b>TARJETAS</b> · Plan</figcaption></figure>
+          <figure class="shot rv" data-cat="tarjetas" data-grupo="kit"><img src="assets/proyectos/balto/kit/tarjeta-evento.png" alt="Tarjeta de evento" loading="lazy" /><figcaption><b>TARJETAS</b> · Evento</figcaption></figure>
+          <figure class="shot rv" data-cat="tarjetas" data-grupo="kit"><img src="assets/proyectos/balto/kit/fila-mascota.png" alt="Fila de mascota" loading="lazy" /><figcaption><b>TARJETAS</b> · Fila de mascota</figcaption></figure>
+          <figure class="shot rv" data-cat="tarjetas" data-grupo="kit"><img src="assets/proyectos/balto/kit/acceso-rapido.png" alt="Acceso rápido" loading="lazy" /><figcaption><b>TARJETAS</b> · Acceso rápido</figcaption></figure>
+          <figure class="shot rv" data-cat="avisos" data-grupo="kit"><img src="assets/proyectos/balto/kit/notificacion.png" alt="Notificación push" loading="lazy" /><figcaption><b>AVISOS</b> · Notificación</figcaption></figure>
+          <figure class="shot rv" data-cat="avisos" data-grupo="kit"><img src="assets/proyectos/balto/kit/dialogo.png" alt="Diálogos de confirmación" loading="lazy" /><figcaption><b>AVISOS</b> · Diálogo</figcaption></figure>
+          <figure class="shot rv" data-cat="avisos" data-grupo="kit"><img src="assets/proyectos/balto/kit/grafica.png" alt="Gráfica de barras" loading="lazy" /><figcaption><b>AVISOS</b> · Gráfica</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= NIVEL 6: MARCA ================= -->
+    <section class="sec" id="marca" data-nivel="MARCA">
+      <div class="sec-head">
+        <p class="nivel rv">NIVEL 6 · MARCA</p>
+        <h2 class="rv" style="--d:.06s">Un perro atento <span class="acento">y un punto final</span>.</h2>
+        <p class="lead rv" style="--d:.12s">El isotipo es la cabeza de un perro recortada dentro de un círculo, con una oreja levantada: siempre pendiente. El punto de «Balto.» cierra el nombre como una frase corta y segura.</p>
+      </div>
+      <div class="marca-b">
+        <figure class="logo-card isotipo-anim rv"><img src="assets/proyectos/balto/isotipo.png" alt="Isotipo de Balto: cabeza de perro en un círculo" loading="lazy" /><figcaption class="pie"><b>ISOTIPO</b></figcaption></figure>
+        <figure class="logo-card rv" style="--d:.08s"><img src="assets/proyectos/balto/logo-vertical.png" alt="Logo vertical de Balto" loading="lazy" /><figcaption class="pie"><b>VERTICAL</b></figcaption></figure>
+        <figure class="logo-card rv" style="--d:.16s"><img src="assets/proyectos/balto/wordmark.png" alt="Wordmark de Balto" loading="lazy" /><figcaption class="pie"><b>WORDMARK</b></figcaption></figure>
+      </div>
+    </section>
+
+    <!-- ================= SIGUIENTE ================= -->
+    <section class="sec" style="padding-top:20px">
+      <a class="siguiente rv" href="nextmove.html" data-salir>
+        <span class="cartucho"><span><img src="assets/cartuchos/branding.jpg" alt="" /></span></span>
+        <div>
+          <small>VOLVER AL PRIMER CARTUCHO · 01/04</small>
+          <strong class="grano">NEXTMOVE</strong>
+          <em>▶ INSERTAR CARTUCHO</em>
+        </div>
+      </a>
+    </section>
+
+    <footer class="pie-pagina">
+      <span>ANDRES CLAROS · PORTAFOLIO</span>
+      <a href="proyectos.html#app-design" data-salir>VOLVER A PROYECTOS ▲</a>
+    </footer>
+  </main>
+
+  <div class="grain" aria-hidden="true"></div>
+  <div class="salida" aria-hidden="true"></div>
+  <script src="proyecto.js"></script>
+  <script>
+    // ---------- Balto ----------
+    // el teléfono del hero va pasando por las pantallas, como una demo
+    const demo = ["bienvenida", "inicio", "linea-tiempo", "panel-salud", "medicamentos", "alertas"];
+    const telHero = document.getElementById("telHero");
+    demo.forEach((n) => { new Image().src = `assets/proyectos/balto/pantallas/${n}.jpg`; });
+    let paso = 0;
+    setInterval(() => {
+      if (document.hidden) return;
+      paso = (paso + 1) % demo.length;
+      telHero.classList.remove("cambia"); void telHero.offsetWidth; telHero.classList.add("cambia");
+      telHero.src = `assets/proyectos/balto/pantallas/${demo[paso]}.jpg`;
+    }, 2600);
+    // clic en un color = copiar su código
+    document.querySelectorAll(".sw").forEach((c) => c.addEventListener("click", () => {
+      navigator.clipboard?.writeText(c.dataset.hex);
+      c.classList.add("copiado");
+      tono(980, 0.08);
+      setTimeout(() => c.classList.remove("copiado"), 1400);
+    }));
+  </script>
+</body>
+</html>

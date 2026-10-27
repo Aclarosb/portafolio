@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NextMove · Branding — Andres Claros</title>
+  <meta name="description" content="NextMove: identidad de marca y redes sociales para una tienda online de artículos deportivos en Colombia." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Doto:wght@800;900&family=Press+Start+2P&family=Silkscreen:wght@700&family=Space+Grotesk:wght@400;500;600&family=Kanit:ital,wght@1,800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="proyecto.css" />
+  <link rel="stylesheet" href="contacto-boton.css" />
+  <style>
+    /* ---------- NEXTMOVE: tipografía de marca ---------- */
+    /* palabra clave con marcador neón que se pinta al aparecer */
+    .resalta { color: #120a1e; padding: 0 .2em; border-radius: 3px; background: linear-gradient(var(--acc), var(--acc)) left / 100% 100% no-repeat; transition: background-size .8s cubic-bezier(.7, 0, .2, 1) .5s, color .4s .6s; }
+    .rv:not(.in) .resalta { background-size: 0 100%; color: inherit; }
+    .marca { font: italic 800 1em "Kanit", sans-serif; text-transform: uppercase; letter-spacing: -.01em; }
+    .marquesina span { font: italic 800 clamp(22px, 3.2vw, 44px) "Kanit", sans-serif; text-transform: uppercase; }
+    .marquesina span:nth-child(even) { color: transparent; -webkit-text-stroke: 1.5px var(--acc); }
+
+    /* ---------- laboratorio del logo ---------- */
+    .logo-lab {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 0 0 1px var(--line), 0 30px 60px rgba(0, 0, 0, .5);
+      transition: background .6s, box-shadow .6s;
+    }
+    .logo-lab img { width: 100%; transition: filter .6s; }
+    .logo-lab[data-v="blanco"] { background: #fff; }
+    .logo-lab[data-v="blanco"] img { filter: invert(1); mix-blend-mode: multiply; }
+    .logo-lab[data-v="neon"] { background: var(--acc); box-shadow: 0 0 0 1px var(--acc), 0 30px 60px rgba(0, 0, 0, .5), 0 0 60px var(--acc-glow); }
+    .logo-lab[data-v="neon"] img { filter: invert(1); mix-blend-mode: multiply; }
+    .punto {
+      position: absolute;
+      left: var(--x); top: var(--y);
+      width: 30px; height: 30px;
+      margin: -15px 0 0 -15px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      font: 400 10px var(--f-pixel);
+      color: #000;
+      background: var(--acc);
+      box-shadow: 0 0 0 0 var(--acc-glow);
+      animation: pulso 1.8s infinite;
+      transition: scale .25s;
+    }
+    .logo-lab[data-v="neon"] .punto { background: #000; color: var(--acc); }
+    .punto:hover, .punto.activo { scale: 1.3; animation: none; box-shadow: 0 0 0 6px rgba(255, 255, 255, .15), 0 0 24px var(--acc-glow); }
+    .versiones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .anatomia { display: grid; gap: 12px; margin-top: 26px; }
+    .anat {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      box-shadow: inset 0 0 0 1px var(--line);
+      transition: box-shadow .3s, background .3s, translate .3s;
+    }
+    .anat b { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font: 400 10px var(--f-pixel); color: #000; background: var(--acc); }
+    .anat h3 { font: 700 15px var(--f-title); letter-spacing: .05em; margin-bottom: 4px; }
+    .anat p { font-size: 15px; line-height: 1.5; color: var(--txt); }
+    .anat.activo { background: rgba(255, 255, 255, .04); box-shadow: inset 0 0 0 1px var(--acc), 0 0 24px var(--acc-glow); translate: 6px 0; }
+
+    /* ---------- sistema visual ---------- */
+    .mapa { display: grid; gap: 54px 18px; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 10px 0; }
+    .mapa .raiz { grid-column: 1 / -1; justify-self: center; padding: 16px 30px; font-size: 26px; }
+    .mapa .raiz .marca { font-size: 1.1em; color: #fff; }
+    .mapa .hoja { background: rgba(255, 255, 255, .02); }
+    .muestras { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(18px, 3vw, 36px); margin-top: clamp(40px, 6vh, 70px); }
+    .colores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .color {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      border-radius: 14px;
+      padding: 14px;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      background: var(--c);
+      color: var(--t, #fff);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12);
+      transition: translate .35s cubic-bezier(.2, .9, .25, 1), box-shadow .35s;
+      cursor: copy;
+    }
+    .color:hover { translate: 0 -8px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), 0 20px 40px rgba(0, 0, 0, .4), 0 0 30px var(--g, transparent); }
+    .color strong { font: 700 14px var(--f-title); letter-spacing: .06em; }
+    .color small { font: 800 12px var(--f-ui); letter-spacing: .1em; opacity: .75; margin-top: 4px; }
+    .color.copiado small::after { content: " ✓ COPIADO"; }
+    .tipo {
+      border-radius: 14px;
+      padding: clamp(20px, 2.6vw, 32px);
+      background: #000;
+      box-shadow: inset 0 0 0 1px var(--line);
+      display: flex; flex-direction: column; justify-content: space-between; gap: 22px;
+    }
+    .tipo-muestra { font-size: clamp(30px, 3.6vw, 52px); line-height: .95; color: #fff; }
+    .tipo-muestra em { display: block; font-style: italic; color: var(--acc); text-shadow: 0 0 18px var(--acc-glow); }
+
+    /* ---------- perfil de Instagram ---------- */
+    .perfil {
+      max-width: 940px;
+      margin: 0 auto;
+      padding: clamp(18px, 3vw, 36px);
+      border-radius: 22px;
+      background: linear-gradient(170deg, #121014, #060507);
+      box-shadow: 0 0 0 1px var(--line), 0 40px 80px rgba(0, 0, 0, .5);
+    }
+    .perfil-cab { display: grid; grid-template-columns: auto 1fr; gap: clamp(16px, 3vw, 36px); align-items: center; }
+    .perfil-avatar {
+      width: clamp(76px, 10vw, 120px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      padding: 4px;
+      background: conic-gradient(from 0deg, var(--acc), #fff, var(--acc));
+      animation: girar 6s linear infinite;
+    }
+    .perfil-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: contain; background: #000; animation: girar 6s linear infinite reverse; }
+    .perfil-nombre { font: italic 800 clamp(22px, 2.4vw, 30px) "Kanit", sans-serif; }
+    .perfil-datos { display: flex; gap: 22px; margin: 6px 0 8px; font: 800 13px var(--f-ui); letter-spacing: .1em; color: var(--dim); }
+    .perfil-datos b { color: var(--ink); }
+    .perfil-bio { font-size: 15px; line-height: 1.45; color: var(--txt); }
+    .destacadas { display: flex; gap: clamp(14px, 3vw, 30px); margin: 28px 0 26px; overflow-x: auto; scrollbar-width: none; }
+    .dest { display: grid; justify-items: center; gap: 8px; font: 800 11px var(--f-ui); letter-spacing: .12em; color: var(--txt); }
+    .dest span {
+      width: clamp(64px, 8vw, 92px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      padding: 3px;
+      background: rgba(255, 255, 255, .18);
+      transition: background .3s, translate .3s cubic-bezier(.2, .9, .25, 1), box-shadow .3s;
+    }
+    .dest img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #060507; }
+    .dest:hover span { background: conic-gradient(var(--acc), #fff, var(--acc)); translate: 0 -6px; box-shadow: 0 0 26px var(--acc-glow); }
+    .dest:hover { color: var(--acc); }
+    .perfil .filtros-btns { justify-content: center; padding-top: 18px; border-top: 1px solid var(--line); }
+    .feed { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+    .post { border-radius: 4px; aspect-ratio: 1; box-shadow: none; }
+    .post figcaption {
+      position: absolute; inset: auto 0 0 0;
+      margin: 0;
+      padding: 30px 12px 12px;
+      font: 800 11px var(--f-ui);
+      color: #fff;
+      background: linear-gradient(transparent, rgba(0, 0, 0, .85));
+      translate: 0 100%;
+      transition: translate .35s cubic-bezier(.2, .9, .25, 1);
+    }
+    .post:hover figcaption { translate: 0 0; }
+    .post figcaption b { display: block; font: 400 8px var(--f-pixel); margin-bottom: 6px; }
+
+    /* ---------- campaña de lanzamiento ---------- */
+    .campana { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(22px, 4vw, 60px); align-items: start; }
+    .campana figure { position: relative; z-index: 1; }
+    .campana .shot { aspect-ratio: 1; }
+    .campana .etapa { display: block; margin-bottom: 12px; font: 400 9px var(--f-pixel); color: var(--acc); }
+    .campana figure:nth-child(4) .shot { box-shadow: 0 0 0 2px var(--acc), 0 24px 50px rgba(0, 0, 0, .45), 0 0 40px var(--acc-glow); }
+
+    @keyframes pulso { 0% { box-shadow: 0 0 0 0 var(--acc-glow); } 70%, 100% { box-shadow: 0 0 0 16px transparent; } }
+    @keyframes girar { to { rotate: 360deg; } }
+
+    @media (max-width: 900px) {
+      .mapa { grid-template-columns: 1fr; gap: 26px; }
+      .mapa svg.lineas { display: none; }
+      .muestras { grid-template-columns: 1fr; }
+      .campana { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .campana svg.lineas { display: none; }
+    }
+  </style>
+</head>
+<body class="p-nextmove cargando">
+
+  <!-- carga: insertando cartucho -->
+  <div class="boot" aria-hidden="true">
+    <div class="boot-inner">
+      <p class="boot-label">INSERTANDO CARTUCHO 01</p>
+      <p class="boot-name grano">NEXTMOVE</p>
+      <div class="boot-bar"><i></i></div>
+      <p class="boot-label">CLIC PARA SALTAR</p>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <a class="back" href="proyectos.html#branding" data-salir><span>◀</span> PROYECTOS</a>
+    <div class="xp">EXP <div class="xp-bar"><i></i></div></div>
+    <p class="topbar-tag">BRANDING · 01/04</p>
+  </header>
+  <nav class="niveles" aria-label="Secciones"></nav>
+
+  <main class="pagina">
+
+    <!-- ================= HERO ================= -->
+    <section class="hero" id="inicio" data-nivel="INICIO">
+      <div class="hero-fondo" style="--fondo:url(assets/proyectos/nextmove/post-avanzar.jpg)"></div>
+      <div>
+        <p class="chip rv"><b></b> BRANDING · IDENTIDAD DE MARCA</p>
+        <h1 class="grano rv" style="--d:.08s">NEXT<br>MOVE</h1>
+        <p class="hero-tagline rv" style="--d:.16s">«Llegó el momento de avanzar»</p>
+        <p class="lead rv" style="--d:.24s">Marca y lanzamiento en redes para <strong>NextMove</strong>: <span class="resalta">equipo deportivo online</span> para toda Colombia.</p>
+        <dl class="ficha rv" style="--d:.32s">
+          <div><dt>CLIENTE</dt><dd>Tienda deportiva online</dd></div>
+          <div><dt>ALCANCE</dt><dd>Toda Colombia</dd></div>
+          <div><dt>MI ROL</dt><dd>Identidad + redes sociales</dd></div>
+          <div><dt>ENTREGABLES</dt><dd>Logo · 10 posts · 4 destacadas</dd></div>
+        </dl>
+        <a class="empezar rv" style="--d:.4s" href="#reto">EMPEZAR NIVEL 1 <span>▼</span></a>
+      </div>
+      <div class="hero-cart rv" style="--d:.2s">
+        <div class="flota"><span class="cartucho"><span><img src="assets/cartuchos/branding.jpg" alt="Cartucho de NextMove" /></span></span></div>
+      </div>
+    </section>
+
+    <div class="marquesina" aria-hidden="true">
+      <div>
+        <span>Entrenar</span><span>Avanzar</span><span>Mejorar</span><span>Next level</span>
+        <span>Entrenar</span><span>Avanzar</span><span>Mejorar</span><span>Next level</span>
+        <span>Entrenar</span><span>Avanzar</span><span>Mejorar</span><span>Next level</span>
+        <span>Entrenar</span><span>Avanzar</span><span>Mejorar</span><span>Next level</span>
+      </div>
+    </div>
+
+    <!-- ================= NIVEL 1: EL RETO ================= -->
+    <section class="sec" id="reto" data-nivel="EL RETO">
+      <div class="sec-head">
+        <p class="nivel rv">NIVEL 1 · EL RETO</p>
+        <h2 class="rv" style="--d:.06s">Una tienda nueva que tenía que sonar a <span class="acento">energía</span>, no a catálogo.</h2>
+        <p class="lead rv" style="--d:.12s">Antes de abrir, NextMove necesitaba más que un nombre: una marca que <span class="resalta">motivara antes de vender</span> y diera confianza para comprar en línea.</p>
+      </div>
+      <div class="tres-col">
+        <article class="card rv">
+          <span class="card-num">01 / PÚBLICO</span>
+          <h3>Gente que entrena</h3>
+          <p class="txt">Entrenan en casa o en el gym y compran desde el celular.</p>
+        </article>
+        <article class="card rv" style="--d:.08s">
+          <span class="card-num">02 / PROBLEMA</span>
+          <h3>Todas se parecen</h3>
+          <p class="txt">Producto sobre fondo blanco y descuentos sin personalidad.</p>
+        </article>
+        <article class="card rv" style="--d:.16s">
+          <span class="card-num">03 / OBJETIVO</span>
+          <h3>Motivar y dar confianza</h3>
+          <p class="txt">Una voz que empuja a moverse y un sistema claro para comprar.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ================= NIVEL 2: EL LOGO ================= -->
+    <section class="sec" id="logo" data-nivel="EL LOGO">
+      <div class="dos-col" style="align-items:start">
+        <div>
+          <div class="logo-lab rv" id="logoLab" data-v="negro">
+            <img src="assets/proyectos/nextmove/logo.jpg" alt="Logo de NextMove: palabra en itálica con tres estelas de velocidad" />
+            <button class="punto" data-p="1" style="--x:27%;--y:44%" aria-label="Itálica pesada">1</button>
+            <button class="punto" data-p="2" style="--x:53.5%;--y:33%" aria-label="La t es una flecha">2</button>
+            <button class="punto" data-p="3" style="--x:34%;--y:67%" aria-label="Tres estelas">3</button>
+            <button class="punto" data-p="4" style="--x:84%;--y:50%" aria-label="Brillo neón">4</button>
+          </div>
+          <div class="versiones rv" style="--d:.1s">
+            <button class="btn-px activo" data-v="negro">SOBRE NEGRO</button>
+            <button class="btn-px" data-v="blanco">SOBRE BLANCO</button>
+            <button class="btn-px" data-v="neon">SOBRE NEÓN</button>
+          </div>
+        </div>
+        <div>
+          <p class="nivel rv">NIVEL 2 · EL LOGO</p>
+          <h2 class="rv" style="--d:.06s">Un logo que <span class="acento">ya va en movimiento</span>.</h2>
+          <p class="lead rv" style="--d:.12s">El nombre ya dice <span class="resalta">«el siguiente paso»</span>; la forma solo lo confirma. Pasa el mouse por los puntos.</p>
+          <div class="anatomia">
+            <div class="anat rv" data-p="1"><b>1</b><div><h3>Itálica pesada</h3><p>Inclinada hacia adelante, como quien arranca a correr.</p></div></div>
+            <div class="anat rv" data-p="2" style="--d:.06s"><b>2</b><div><h3>La «t» es una flecha</h3><p>Apunta hacia arriba y une Next + Move.</p></div></div>
+            <div class="anat rv" data-p="3" style="--d:.12s"><b>3</b><div><h3>Tres estelas</h3><p>Un rastro de velocidad en el sentido de lectura.</p></div></div>
+            <div class="anat rv" data-p="4" style="--d:.18s"><b>4</b><div><h3>Brillo neón</h3><p>Se enciende sobre negro y funciona en blanco o amarillo.</p></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= NIVEL 3: SISTEMA VISUAL ================= -->
+    <section class="sec" id="sistema" data-nivel="SISTEMA">
+      <div class="sec-head">
+        <p class="nivel rv">NIVEL 3 · SISTEMA VISUAL</p>
+        <h2 class="rv" style="--d:.06s">Tres ideas, <span class="acento">un mismo idioma</span>.</h2>
+        <p class="lead rv" style="--d:.12s">Cada emoción de la marca se vuelve <span class="resalta">una regla visual</span> que se repite en todo.</p>
+      </div>
+
+      <div class="mapa diagrama" data-lineas="m-raiz>m-mov, m-raiz>m-ene, m-raiz>m-con, m-mov>h-mov, m-ene>h-ene, m-con>h-con">
+        <div class="nodo raiz" id="m-raiz"><span class="marca">NextMove</span></div>
+        <div class="nodo" id="m-mov">MOVIMIENTO<small>LA ACTITUD</small></div>
+        <div class="nodo" id="m-ene">ENERGÍA<small>LA EMOCIÓN</small></div>
+        <div class="nodo" id="m-con">CONFIANZA<small>LA PROMESA</small></div>
+        <div class="nodo hoja" id="h-mov">Itálicas + estelas<small>LOGO Y TITULARES</small></div>
+        <div class="nodo hoja" id="h-ene">Neón sobre negro<small>COLOR</small></div>
+        <div class="nodo hoja" id="h-con">Íconos de línea + textos claros<small>ICONOGRAFÍA</small></div>
+      </div>
+
+      <div class="muestras">
+        <div class="colores">
+          <button class="color rv" style="--c:#000000;--g:rgba(255,255,255,.15)" data-hex="#000000"><strong>NEGRO</strong><small>#000000</small></button>
+          <button class="color rv" style="--c:#F6FD57;--t:#000;--g:var(--acc-glow);--d:.08s" data-hex="#F6FD57"><strong>NEÓN</strong><small>#F6FD57</small></button>
+          <button class="color rv" style="--c:#FFFFFF;--t:#000;--g:rgba(255,255,255,.3);--d:.16s" data-hex="#FFFFFF"><strong>BLANCO</strong><small>#FFFFFF</small></button>
+        </div>
+        <div class="tipo rv" style="--d:.1s">
+          <p class="pie"><b>TITULARES</b> · SANS PESADA, MAYÚSCULAS</p>
+          <p class="tipo-muestra marca">Llegó el momento de <em>avanzar</em></p>
+          <p class="pie">La palabra clave siempre va en neón. El resto, en blanco.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= NIVEL 4: EL FEED ================= -->
+    <section class="sec" id="feed" data-nivel="EL FEED">
+      <div class="sec-head">
+        <p class="nivel rv">NIVEL 4 · EL FEED</p>
+        <h2 class="rv" style="--d:.06s">Un perfil que <span class="acento">se lee como una marca</span>.</h2>
+        <p class="lead rv" style="--d:.12s">Tres tipos de post y <span class="resalta">cuatro destacadas</span> que responden lo que un cliente pregunta antes de comprar. Filtra y haz clic para ver en grande.</p>
+      </div>
+
+      <div class="perfil rv" data-filtros>
+        <div class="perfil-cab">
+          <div class="perfil-avatar"><img src="assets/proyectos/nextmove/logo.jpg" alt="" /></div>
+          <div>
+            <p class="perfil-nombre">NextMove</p>
+            <p class="perfil-datos"><span><b>9</b> publicaciones</span><span><b>4</b> destacadas</span></p>
+            <p class="perfil-bio">Tienda online de artículos deportivos · Equipo para entrenar en casa o en el gym · Envíos a toda Colombia</p>
+          </div>
+        </div>
+
+        <div class="destacadas">
+          <figure class="dest"><span><img src="assets/proyectos/nextmove/destacada-dudas.jpg" alt="Portada de destacada: Dudas" /></span>DUDAS</figure>
+          <figure class="dest"><span><img src="assets/proyectos/nextmove/destacada-resenas.jpg" alt="Portada de destacada: Reseñas" /></span>RESEÑAS</figure>
+          <figure class="dest"><span><img src="assets/proyectos/nextmove/destacada-contacto.jpg" alt="Portada de destacada: Contacto" /></span>CONTACTO</figure>
+          <figure class="dest"><span><img src="assets/proyectos/nextmove/destacada-envios.jpg" alt="Portada de destacada: Envíos" /></span>ENVÍOS</figure>
+        </div>
+
+        <div class="filtros-btns">
+          <button class="btn-px activo" data-f="todos">TODOS</button>
+          <button class="btn-px" data-f="lanzamiento">LANZAMIENTO</button>
+          <button class="btn-px" data-f="marca">CONFIANZA</button>
+          <button class="btn-px" data-f="motivacion">MOTIVACIÓN</button>
+        </div>
+
+        <div class="feed">
+          <figure class="shot post rv" data-cat="lanzamiento" data-grupo="feed"><img src="assets/proyectos/nextmove/post-inauguracion.jpg" alt="Post: Abrimos y te premiamos, descubre los descuentos" loading="lazy" /><figcaption><b>LANZAMIENTO</b>Apertura con cupón de descuento</figcaption></figure>
+          <figure class="shot post rv" data-cat="lanzamiento" data-grupo="feed" style="--d:.05s"><img src="assets/proyectos/nextmove/post-avanzar.jpg" alt="Post teaser: Llegó el momento de avanzar" loading="lazy" /><figcaption><b>LANZAMIENTO</b>Teaser · «avanzar»</figcaption></figure>
+          <figure class="shot post rv" data-cat="lanzamiento" data-grupo="feed" style="--d:.1s"><img src="assets/proyectos/nextmove/post-entrenar.jpg" alt="Post teaser: Todo lo que necesitas para entrenar" loading="lazy" /><figcaption><b>LANZAMIENTO</b>Teaser · presentación del logo</figcaption></figure>
+          <figure class="shot post rv" data-cat="marca" data-grupo="feed"><img src="assets/proyectos/nextmove/post-somos.jpg" alt="Post: ¿Quiénes somos?" loading="lazy" /><figcaption><b>CONFIANZA</b>¿Quiénes somos?</figcaption></figure>
+          <figure class="shot post rv" data-cat="marca" data-grupo="feed" style="--d:.05s"><img src="assets/proyectos/nextmove/post-porque.jpg" alt="Post: ¿Por qué confiar en NextMove?" loading="lazy" /><figcaption><b>CONFIANZA</b>¿Por qué confiar en NextMove?</figcaption></figure>
+          <figure class="shot post rv" data-cat="marca" data-grupo="feed" style="--d:.1s"><img src="assets/proyectos/nextmove/post-equipos.jpg" alt="Post: Todo lo que necesitas para poder entrenar, equipos de calidad" loading="lazy" /><figcaption><b>CONFIANZA</b>Equipos de calidad</figcaption></figure>
+          <figure class="shot post rv" data-cat="motivacion" data-grupo="feed"><img src="assets/proyectos/nextmove/post-disciplina.jpg" alt="Post: La motivación falla, la disciplina manda" loading="lazy" /><figcaption><b>MOTIVACIÓN</b>La disciplina manda</figcaption></figure>
+          <figure class="shot post rv" data-cat="motivacion" data-grupo="feed" style="--d:.05s"><img src="assets/proyectos/nextmove/post-progreso.jpg" alt="Post: El progreso es una decisión diaria" loading="lazy" /><figcaption><b>MOTIVACIÓN</b>El progreso es diario</figcaption></figure>
+          <figure class="shot post rv" data-cat="motivacion" data-grupo="feed" style="--d:.1s"><img src="assets/proyectos/nextmove/post-antes-despues.jpg" alt="Post: Antes y después" loading="lazy" /><figcaption><b>MOTIVACIÓN</b>Antes / después</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= NIVEL 5: LANZAMIENTO ================= -->
+    <section class="sec" id="lanzamiento" data-nivel="LANZAMIENTO">
+      <div class="sec-head">
+        <p class="nivel rv">NIVEL 5 · CAMPAÑA DE LANZAMIENTO</p>
+        <h2 class="rv" style="--d:.06s">Tres teasers, <span class="acento">una apertura</span>.</h2>
+        <p class="lead rv" style="--d:.12s">Misma frase, <span class="resalta">un verbo distinto</span> cada vez: «Llegó el momento de…». La apertura cierra con un cupón por tiempo limitado.</p>
+      </div>
+      <div class="campana diagrama" data-orient="h" data-lineas="c1>c2, c2>c3, c3>c4">
+        <figure class="rv"><span class="etapa">TEASER 01</span><div class="shot" id="c1" data-grupo="campana"><img src="assets/proyectos/nextmove/post-entrenar.jpg" alt="Teaser 1: presentación del logo" loading="lazy" /></div><figcaption><b>ENTRENAR</b> · Aparece el logo</figcaption></figure>
+        <figure class="rv" style="--d:.1s"><span class="etapa">TEASER 02</span><div class="shot" id="c2" data-grupo="campana"><img src="assets/proyectos/nextmove/post-avanzar.jpg" alt="Teaser 2: llegó el momento de avanzar" loading="lazy" /></div><figcaption><b>AVANZAR</b> · El logo se enciende</figcaption></figure>
+        <figure class="rv" style="--d:.2s"><span class="etapa">TEASER 03</span><div class="shot" id="c3" data-grupo="campana"><img src="assets/proyectos/nextmove/post-mejorar.jpg" alt="Teaser 3: llegó el momento de mejorar" loading="lazy" /></div><figcaption><b>MEJORAR</b> · Cambia el verbo</figcaption></figure>
+        <figure class="rv" style="--d:.3s"><span class="etapa">APERTURA ★</span><div class="shot" id="c4" data-grupo="campana"><img src="assets/proyectos/nextmove/post-inauguracion.jpg" alt="Apertura: abrimos y te premiamos" loading="lazy" /></div><figcaption><b>ABRIMOS</b> · Cupón por tiempo limitado</figcaption></figure>
+      </div>
+    </section>
+
+    <!-- ================= SIGUIENTE ================= -->
+    <section class="sec" style="padding-top:20px">
+      <a class="siguiente rv" href="emotions.html" data-salir>
+        <span class="cartucho"><span><img src="assets/cartuchos/short-film.jpg" alt="" /></span></span>
+        <div>
+          <small>SIGUIENTE CARTUCHO · 02/04</small>
+          <strong class="grano">EMOTIONS</strong>
+          <em>▶ INSERTAR CARTUCHO</em>
+        </div>
+      </a>
+    </section>
+
+    <footer class="pie-pagina">
+      <span>ANDRES CLAROS · PORTAFOLIO</span>
+      <a href="proyectos.html#branding" data-salir>VOLVER A PROYECTOS ▲</a>
+    </footer>
+  </main>
+
+  <div class="grain" aria-hidden="true"></div>
+  <div class="salida" aria-hidden="true"></div>
+  <script src="proyecto.js"></script>
+  <script>
+    // ---------- NextMove: anatomía del logo y versiones de color ----------
+    const lab = document.getElementById("logoLab");
+    const marcar = (p) => document.querySelectorAll("[data-p]").forEach((el) => el.classList.toggle("activo", el.dataset.p === p));
+    document.querySelectorAll(".punto, .anat").forEach((el) => {
+      el.addEventListener("pointerenter", () => { marcar(el.dataset.p); tono(600 + el.dataset.p * 120, 0.05); });
+      el.addEventListener("pointerleave", () => marcar(null));
+    });
+    document.querySelectorAll(".versiones button").forEach((b) => b.addEventListener("click", () => {
+      lab.dataset.v = b.dataset.v;
+      document.querySelectorAll(".versiones button").forEach((x) => x.classList.toggle("activo", x === b));
+      tono(720, 0.06);
+    }));
+    // clic en un color = copiar su código
+    document.querySelectorAll(".color").forEach((c) => c.addEventListener("click", () => {
+      navigator.clipboard?.writeText(c.dataset.hex);
+      c.classList.add("copiado");
+      tono(980, 0.08);
+      setTimeout(() => c.classList.remove("copiado"), 1400);
+    }));
+  </script>
+</body>
+</html>
